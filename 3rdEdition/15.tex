@@ -1,0 +1,53 @@
+\documentclass{article} 
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{float}
+
+\title{Chapter 15}
+\author{Saman Saadi} 
+
+\begin{document}
+	\section*{15}
+	\subsection*{15.1-2}
+	No it cannot always produce an optimal solution. Consider the following example.
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{r||c|c|c}			
+			$l_i$ & 1 & 2 & 3\\
+			\hline
+			$p_i$ & 1 & 50 & 72 \\
+			\hline
+			$\frac{p_i}{l_i}$ & 1 & 25 & 24
+		\end{tabular}
+	\end{table}
+	For n = 3 the greedy approach cut the rod in 2 pieces. The length of one of them is 2 and the other's is 1. So the profit is $50\$ + 1\$ = 51\$$. But the optimal solution is to keep the rod intact so the profit is $72\$$.
+	\subsection*{15.1-3}
+	We can keep the rod intact so we don't need to incur the fixed cost c or we can have at least one cut. We need to choose the best solution among all of them:
+	\begin{equation*}
+	r(i) = \begin{cases}
+	\max\limits_{1 \leq k < n}(p_i, r(i - k) + p_k - c) & i > 0 \\
+	0 & i = 0
+	\end{cases}
+	\end{equation*}
+	So the solution is $r(n)$. We have n distinct subproblem. In each step we need to choose between keeping the rod intact or have at least one cut which divide the rod into two pieces. The length of one of them is k and the other's $n - k$. We don't know the exact value of k so we need to try all possible values. This can be done in $O(n)$. Therefore the overall running time is $O(n^2)$
+	
+	\begin{algorithm}
+		\begin{algorithmic}[1]
+			\Function{f}{p, n, c}
+			\State let r[0..n] be a new array
+			\State $r[0] \gets 0$
+			\For{$\text{j from 1 to n}$}
+			\State $q \gets p[j]$
+			\For{i from 1 to $j - 1$}
+			\State $q = max(q, r[j - i] + p[i] - c)$
+			\EndFor
+			\State r[j] = q
+			\EndFor
+			\State \Return $r[n]$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm}
+\end{document}
