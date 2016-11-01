@@ -84,32 +84,59 @@
 	\end{equation}
 	Hence the space complexity is is $O(n^2)$. We don't use all of the array cells when $j < i$. So we waste $\frac{n^2 - n}{2}$ of allocated array. By analyzing lines 5 - 10 of MATRIX-CHAIN-ORDER pseudocode in the text book we can compute the number of edges.
 	\begin{figure}[h!]
-		\includegraphics[width=\linewidth]{images/15/15-2-4.png}
-		\end{figure}
-		As you can see in line 10, m[i, j] is depends on two subproblem m[i, k] and m[k + 1, j]. We visit each distinct subproblem exactly once. So by counting the outdegree of each node we can calculate the number of edges in a directed graph:
-		\begin{equation}
-		\begin{split}
-		|E| &= \sum_{l = 2}^{n}\sum_{i=1}^{n - l + 1}\sum_{k = i}^{i+l-2}2 \\
-		&= \sum_{l=2}^{n}\sum_{i=1}^{n-l+1}2(l-1) \\
-		&= 2\sum_{l=2}^{n}(n - l + 1)(l-1) \\
-		&= 2\sum_{l=2}^{n}(n -(l - 1))(l-1) \\
-		&= 2\sum_{l=1}^{n-1}(n-l)l \\
-		&= 2(\sum_{l=1}^{n-1}nl - \sum_{l=1}^{n-1}l^2) \\
-		&= 2(n\sum_{l=1}^{n-1}l - \sum_{l=1}^{n-1}l^2) \\
-		&= 2[n\frac{(n - 1)n}{2} - \frac{(n - 1)(n)(2n - 1)}{6}] \\
-		&= n^2(n - 1) - \frac{n(n-1)(2n-1)}{3} \\
-		&= \frac{3n^2(n-1)-n(n-1)(2n-1)}{3} \\
-		&= \frac{n(n-1)(3n-2n+1)}{3} \\
-		&= \frac{n(n-1)(n+1)}{3}\\
-		&= \frac{n(n^2-1)}{3}\\
-		&= \frac{n^3 - n}{3}
-		\end{split}
-		\end{equation}
-		So the running time is $|V| + |E| = \frac{n^2 + n}{2} + \frac{n^3 - n}{3} = O(n^3)$
-		\section{Elements of dynamic programming}
-		\subsection{Exercise 2}
-		Each node is filled with (p, r). p is the index of leftmost element and r is the index of rightmost element of array which the subprolem wants to sort. As you can see there is no overlapping between subproblems so dynamic programming is not a good idea for merge sort. In other words, we don't see a previously solved subproblem again and we only waste memory. As a general rule if the subproblem graph is a tree, dynamic programming cannot be applied.
-		\begin{figure}[h!]
-			\includegraphics[width=\linewidth]{images/15/15-3-2.png}
-		\end{figure}
+	\includegraphics[width=\linewidth]{images/15/15-2-4.png}
+	\end{figure}
+	As you can see in line 10, m[i, j] is depends on two subproblem m[i, k] and m[k + 1, j]. We visit each distinct subproblem exactly once. So by counting the outdegree of each node we can calculate the number of edges in a directed graph:
+	\begin{equation}
+	\begin{split}
+	|E| &= \sum_{l = 2}^{n}\sum_{i=1}^{n - l + 1}\sum_{k = i}^{i+l-2}2 \\
+	&= \sum_{l=2}^{n}\sum_{i=1}^{n-l+1}2(l-1) \\
+	&= 2\sum_{l=2}^{n}(n - l + 1)(l-1) \\
+	&= 2\sum_{l=2}^{n}(n -(l - 1))(l-1) \\
+	&= 2\sum_{l=1}^{n-1}(n-l)l \\
+	&= 2(\sum_{l=1}^{n-1}nl - \sum_{l=1}^{n-1}l^2) \\
+	&= 2(n\sum_{l=1}^{n-1}l - \sum_{l=1}^{n-1}l^2) \\
+	&= 2[n\frac{(n - 1)n}{2} - \frac{(n - 1)(n)(2n - 1)}{6}] \\
+	&= n^2(n - 1) - \frac{n(n-1)(2n-1)}{3} \\
+	&= \frac{3n^2(n-1)-n(n-1)(2n-1)}{3} \\
+	&= \frac{n(n-1)(3n-2n+1)}{3} \\
+	&= \frac{n(n-1)(n+1)}{3}\\
+	&= \frac{n(n^2-1)}{3}\\
+	&= \frac{n^3 - n}{3}
+	\end{split}
+	\end{equation}
+	So the running time is $|V| + |E| = \frac{n^2 + n}{2} + \frac{n^3 - n}{3} = O(n^3)$
+	\section{Elements of dynamic programming}
+	\subsection{Exercise 2}
+	Each node is filled with (p, r). p is the index of leftmost element and r is the index of rightmost element of array which the subprolem wants to sort. As you can see there is no overlapping between subproblems so dynamic programming is not a good idea for merge sort. In other words, we don't see a previously solved subproblem again and we only waste memory. As a general rule if the subproblem graph is a tree, dynamic programming cannot be applied.
+	\begin{figure}[h!]
+		\includegraphics[width=\linewidth]{images/15/15-3-2.png}
+	\end{figure}
+	\chapter{Amortized Analysis}
+	\section{Aggregate analysis}
+	\subsection{Exercise 1}
+	No it doesn't hold. The maximum number of pops, including multipop, is proportional to the number of previous push operations. If we can only push one item, the number of pushed elements is at most $n$. If we add a new operation named multipush, then the number of pushed items is at most $n \times k$. So the amortized cost is $O(k)$. For example we can have two operations. One is multipushing $10^9$ items and the other is multipopping $10^9$ items. It is obvious the total cost is not $O(n) = O(2)$ and is $O(nk) = O(2 \times 10^9)$.
+	\subsection{Exercise 2}
+	The following pseudo-code explains how to implement DECREMENT.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{DECREMENT}{A}
+			\State $i = 0$
+			\While{$i < A.length \text{ and } A[i] == 0$}
+			\State $A[i] = 1$
+			\State $i = i + 1$
+			\EndWhile
+			\If{$i < A.length$}
+			\State $A[i] = 0$
+			\EndIf
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	The worst case happens when we start with 0 and then decrements it to get $2^k - 1$ which all bits are set to 1 and then increments it to get 0. We repeat this loop until we have n operations. For $n = 4$ and $k = 3$ we have:
+	\begin{align*}
+		&000 \\
+		&111 \\
+		&000 \\
+		&111
+	\end{align*}
 \end{document}
