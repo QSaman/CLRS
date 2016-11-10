@@ -6,6 +6,7 @@
 \usepackage{algpseudocode}
 \usepackage{float}
 \usepackage{hyperref}
+\usepackage{placeins}
 
 \hypersetup{
 	colorlinks,
@@ -26,8 +27,8 @@
 	\tableofcontents
 	\mainmatter
 	\chapter{Dynamic Programming}
-	\section{Rod cutting}
-	\subsection{Exercise 2}
+	\section{Rod cutting}	
+	\paragraph{Exercise 2}
 	No it cannot always produce an optimal solution. Consider the following example.
 	\begin{table}[H]
 		\centering
@@ -40,7 +41,7 @@
 		\end{tabular}
 	\end{table}
 	For n = 3 the greedy approach cut the rod in 2 pieces. The length of one of them is 2 and the other's is 1. So the profit is $50\$ + 1\$ = 51\$$. But the optimal solution is to keep the rod intact so the profit is $72\$$.
-	\subsection{Exercise 3}
+	\paragraph{Exercise 3}
 	We can keep the rod intact so we don't need to incur the fixed cost c or we can have at least one cut. We need to choose the best solution among all of them:
 	\begin{equation*}
 	r(i) = \begin{cases}
@@ -67,7 +68,7 @@
 		\end{algorithmic}
 	\end{algorithm}
 	\section{Matrix-chain multiplication}
-	\subsection{Exercise 4}
+	\paragraph{Exercise 4}
 	I've used the following equations:
 	\begin{align}
 	\sum_{i = 1}^{n} i &= \frac{n(n + 1)}{2}\\
@@ -107,16 +108,16 @@
 	\end{equation}
 	So the running time is $|V| + |E| = \frac{n^2 + n}{2} + \frac{n^3 - n}{3} = O(n^3)$
 	\section{Elements of dynamic programming}
-	\subsection{Exercise 2}
+	\paragraph{Exercise 2}
 	Each node is filled with (p, r). p is the index of leftmost element and r is the index of rightmost element of array which the subprolem wants to sort. As you can see there is no overlapping between subproblems so dynamic programming is not a good idea for merge sort. In other words, we don't see a previously solved subproblem again and we only waste memory. As a general rule if the subproblem graph is a tree, dynamic programming cannot be applied.
 	\begin{figure}[h!]
 		\includegraphics[width=\linewidth]{images/15/15-3-2.png}
 	\end{figure}
 	\chapter{Amortized Analysis}
 	\section{Aggregate analysis}
-	\subsection{Exercise 1}
+	\paragraph{Exercise 1}
 	No it doesn't hold. The maximum number of pops, including multipop, is proportional to the number of previous push operations. If we can only push one item, the number of pushed elements is at most $n$. If we add a new operation named multipush, then the number of pushed items is at most $n \times k$. So the amortized cost is $O(k)$. For example we can have two operations. One is multipushing $10^9$ items and the other is multipopping $10^9$ items. It is obvious the total cost is not $O(n) = O(2)$ and is $O(nk) = O(2 \times 10^9)$.
-	\subsection{Exercise 2}
+	\paragraph{Exercise 2}
 	The following pseudo-code explains how to implement DECREMENT.
 	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
@@ -139,4 +140,177 @@
 		&000 \\
 		&111
 	\end{align*}
+	\section{Accountant method}
+	For another example of "accountant method" see exercise 5 of \ref{sec:Representation of graphs}.
+	\chapter{Elementary Graph Algorithms}
+	\section{Representation of graphs}
+	\label{sec:Representation of graphs}
+	\paragraph{Exercise 1}
+	We know that $adj[u]$ is a list. Depends on the list implementation, it can take $O(1)$ to determine its size. In that case the running time for finding the out-degree of each vertex is $O(V)$. If we cannot determine size of the list in $O(1)$, then the overall running time of algorithm is $O(V + E)$. \\
+	The running time for finding in-degree of each vertex is $O(V + E)$.
+	\paragraph{Exercise 3}
+	For adjacency-matrix it takes $O(V^2)$ and for adjacency-list it takes $O(V + E)$.
+	\begin{algorithm}
+		\caption{$G'$ using adjacency matrix}
+		\begin{algorithmic}[1]
+			\Function{TransposeGraph}{G}
+				\State Let $G'$ be a new graph
+				\State $G' \gets G$
+				\ForAll{$u \in V$}
+					\ForAll{$v \in V$}
+						\State $G'.A[v][u] = G.A[u][v]$
+					\EndFor
+				\EndFor
+				\State \Return $G'$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm}
+	\begin{algorithm*}
+		\caption{$G'$ using adjacency list}
+		\begin{algorithmic}[1]
+			\Function{TransposeGraph}{G}
+				\State Let $G'$ be a new graph
+				\State $G'.V = G.V$
+				\ForAll{$u \in G.V$}
+					\ForAll{$v \in G.Adj[u]$}
+						\State $G'.Adj[v].insert(u)$
+					\EndFor
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	\paragraph{Exercise 4}
+	We create a new adjacency-list for $G'$ called $adj$. For each vertex $u$ in $G$, suppose $v$ is its neighbor. If $u \ne v$, then $adj[u].insert(v)$ and $adj[v].insert(u)$. If there are multiple edges between $u$ and $v$, we see $v$ as $u$'s neighbor more than once. So if the last element if $adj[v]$ is $u$, it means there are more than one edges between them so we shouldn't insert $v$ again. Traversing $G$ takes $O(V + E)$. Finding out there are more than one edge between two vertices is $O(1)$. So the overall running time is $O(V + E)$. Note that I supposed $G$ is also undirected.
+	\begin{algorithm}
+		\begin{algorithmic}[1]
+			\Function{f}{G}
+			\State $\text{let }G' \text{ be a new graph}$
+			\State $G'.V = G.V$
+			\ForAll{$u \in G.V$}
+				\ForAll{$v \in G.adj[u]$}
+					\If{$u \ne v \land G'.adj[v].last() \ne u$}
+						\State $G'.adj[v].insert(u)$		
+					\EndIf
+				\EndFor
+			\EndFor
+			\State \Return $G'$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm}
+	\paragraph{Exercise 5}
+	The running time of matrix-list implementation is $O(V^3)$. For analyzing the running time of adjacency-list implementation we can use amortized analysis. We use "accountant method".
+	\begin{enumerate}
+		\item[] $\boldsymbol{in_u:}$ The number of edges that enter $u$
+		\item[] $\boldsymbol{out_u:}$ The number of edges that leave $u$
+		\item[] $\boldsymbol{e_u:}$ And edge from u to an arbitrary vertex $v \ne u$
+	\end{enumerate}
+	We assign to all $e_u$ cost $c_{e_u} = 1 + in_u$. Because by traversing the graph, we visit $e_u$ at least once (line \ref{MakeSquareGraph:1-path}). For each edge that enters $u$ we visit or revisit $e_u$ (lines \ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2}). We know that $\sum_{u = 1}^{|V|}{in_u} + \sum_{u = 1}^{|V|}{out_u} = 2|E|$. So we can easily calculate the total cost.
+	\begin{equation*}
+		\begin{split}
+		\sum_{e_u \in E}{c_{e_u}} &= \sum_{e_u \in E}{1 + in_u} \\
+		&= \sum_{e_u \in E}{1} + \sum_{u = 1}^{|V|}{in_u} \\
+		&= |E| + \sum_{u = 1}^{|V|}{in_u} \\
+		&\le 3|E|
+		\end{split}
+	\end{equation*}
+	We execute line \ref{MakeSquareGraph:1-path} at most $|E|$ times and lines \ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2} at most $2|E|$ times. So the total running time of algorithm using adjacency-list is $O(|V| + 3|E|) = O(V + E)$.
+	\begin{algorithm*}
+		\caption{Finding square graph using matrix-list}
+		\begin{algorithmic}[1]
+			\Function{MakeSquareGraph}{G}
+				\State Let $G'$ be a new Graph
+				\Comment $G.A[1..|V|, 1..|V|]$
+				\ForAll{$u \in G.V$}
+					\ForAll{$v \in G.V$}
+						\State $G'.A[u][v] = G.A[u][v]$
+						\Comment 1-edge paths
+						\If{$G.A[u][v] = 1$}
+							\ForAll{$k \in G.V$}
+								\State $G'.A[u][k] = G.A[v][k]$
+								\Comment 2-edge paths
+							\EndFor
+						\EndIf
+					\EndFor
+				\EndFor				
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\begin{algorithm*}
+		\caption{Finding square graph using adjacency-list}
+		\begin{algorithmic}[1]
+			\Function{MakeSqureGraph}{G}
+				\State Let $G'$	be a new graph
+				\State $G'.V = G.V$
+				\ForAll{$u \in G.V$}
+					\ForAll{$v \in G.Adj[u]$}
+						\State $G'.Adj[u].insert(v)$ \label{MakeSquareGraph:1-path}
+						\Comment 1-edge paths
+						\ForAll{$w \in G.Adj[v]$} \label{MakeSquareGraph:2-path:1}
+							\State $G'.Adj[u].insert(w)$ \label{MakeSquareGraph:2-path:2}
+							\Comment 2-edge paths
+						\EndFor						
+					\EndFor
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	\paragraph{Exercise 6}
+	Suppose $A$ is an adjacency matrix for $G$.
+	\begin{equation*}
+		A[i, j] = \begin{cases}
+		1 & \text{i cannot be a universal sink} \\
+		0 & \text{j cannot be a universal sink}
+		\end{cases}
+	\end{equation*}
+	The following algorithm find the universal sink in $O(V)$. In each step we remove one vertex from all candidates for "universal sink". It takes $O(V)$ to have only one candidate. To determine that candidate is indeed a universal sink we need $O(2V)$ operations. So the overall running time of algorithm is $O(V) + O(2V) = O(V)$.
+	\begin{algorithm*}
+		\begin{algorithmic}[1]
+			\Function{getUniversalSink}{G}
+				\State $A = G.A$
+				\Comment $A[1..|V|, 1..|V|]$
+				\State $u \gets 1$								
+				\While{$u \le |V|$}
+					\State $v \gets u + 1$
+					\State $sink \gets u$
+					\Comment Vertices from $sink$ to $|V|$ can be universal sink					
+					\While{$v \le |V| \land A[u, v] = 0$}
+						\State $v \gets v + 1$
+						\Comment $v$ cannot be a universal sink
+					\EndWhile
+					\State $u \gets v$
+					\Comment $u$ to $v - 1$ cannot be a universal sink
+				\EndWhile
+				\For{$c$ from $1$ to $sink - 1$}
+					\If{$A[sink, c] \ne 0$}
+						\State \Return "No universal sink"
+					\EndIf
+				\EndFor
+				\For{$r \in V - \{sink\}$}
+					\If{$A[r, sink] \ne 1$}
+						\State \Return "No universal sink"
+					\EndIf
+				\EndFor
+				\State \Return sink
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	\paragraph{Exercise 7}
+	We know that $B$ is an $V \times E$ matrix which we show it as $B_{V \times E}$. By definition $B^T$ is an $E \times V$ matrix which we show it as $B_{E \times V}^T$. We define $P_{V \times V} = B_{V \times E} \times B_{E \times V}^T$.
+	\begin{equation*}
+		p[i, j] = \sum_{k = 1}^{E}b[i, k] \times b^T[k, j]
+	\end{equation*}
+	We consider two cases.
+	\begin{enumerate}
+		\item $\boldsymbol{i \ne j:}$ It is impossible that both $b[i, k]$ and $b[k, j]$ have the value of "1". Because the k\textsuperscript{th} edge cannot enter both vertices $i$ and $j$. With the same argument we can prove that both of them cannot have value of "-1". If the k\textsuperscript{th} edge connect i to j, then $b[i, k] = -1$ and $b^T[k, j] = 1$. Otherwise both have value of zero. In other words, for $i \ne j$ the value of $p[i, j]$ is the number of edges between $i$ and $j$.
+		\item $\boldsymbol{i = j:}$ It is obvious both $b[i, k]$ and $b[k, i]$ should have the same value. In this case $p[i, i]$ is the sum of all edges that enter and leave the vertex $i$.
+	\end{enumerate}
+	\begin{equation*}
+		p[i, j] = \begin{cases}
+		\text{number of edges between i and j} & i \ne j \\
+		indegree(i) + outdegree(i) & i = j
+		\end{cases}
+	\end{equation*}
 \end{document}
