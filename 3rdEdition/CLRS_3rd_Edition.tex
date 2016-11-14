@@ -155,7 +155,7 @@
 	The running time for finding in-degree of each vertex is $O(V + E)$.
 	\paragraph{Exercise 3}
 	For adjacency-matrix it takes $O(V^2)$ and for adjacency-list it takes $O(V + E)$.
-	\begin{algorithm}
+	\begin{algorithm}[h!]
 		\caption{$G'$ using adjacency matrix}
 		\begin{algorithmic}[1]
 			\Function{TransposeGraph}{G}
@@ -170,7 +170,7 @@
 			\EndFunction
 		\end{algorithmic}
 	\end{algorithm}
-	\begin{algorithm*}
+	\begin{algorithm*}[h!]
 		\caption{$G'$ using adjacency list}
 		\begin{algorithmic}[1]
 			\Function{TransposeGraph}{G}
@@ -187,7 +187,7 @@
 	\FloatBarrier
 	\paragraph{Exercise 4}
 	We create a new adjacency-list for $G'$ called $adj$. For each vertex $u$ in $G$, suppose $v$ is its neighbor. If $u \ne v$, then $adj[u].insert(v)$ and $adj[v].insert(u)$. If there are multiple edges between $u$ and $v$, we see $v$ as $u$'s neighbor more than once. So if the last element if $adj[v]$ is $u$, it means there are more than one edges between them so we shouldn't insert $v$ again. Traversing $G$ takes $O(V + E)$. Finding out there are more than one edge between two vertices is $O(1)$. So the overall running time is $O(V + E)$. Note that I supposed $G$ is also undirected.
-	\begin{algorithm}
+	\begin{algorithm}[h!]
 		\begin{algorithmic}[1]
 			\Function{f}{G}
 			\State $\text{let }G' \text{ be a new graph}$
@@ -220,7 +220,7 @@
 		\end{split}
 	\end{equation*}
 	We execute line \ref{MakeSquareGraph:1-path} at most $|E|$ times and lines \ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2} at most $2|E|$ times. So the total running time of algorithm using adjacency-list is $O(|V| + 3|E|) = O(V + E)$.
-	\begin{algorithm*}
+	\begin{algorithm*}[h!]
 		\caption{Finding square graph using matrix-list}
 		\begin{algorithmic}[1]
 			\Function{MakeSquareGraph}{G}
@@ -241,7 +241,7 @@
 			\EndFunction
 		\end{algorithmic}
 	\end{algorithm*}
-	\begin{algorithm*}
+	\begin{algorithm*}[h!]
 		\caption{Finding square graph using adjacency-list}
 		\begin{algorithmic}[1]
 			\Function{MakeSqureGraph}{G}
@@ -270,7 +270,7 @@
 		\end{cases}
 	\end{equation*}
 	The following algorithm find the universal sink in $O(V)$. In each step we remove one vertex from all candidates for "universal sink". It takes $O(V)$ to have only one candidate. To determine that candidate is indeed a universal sink we need $O(2V)$ operations. So the overall running time of algorithm is $O(V) + O(2V) = O(V)$.
-	\begin{algorithm*}
+	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
 			\Function{getUniversalSink}{G}
 				\State $A = G.A$
@@ -353,7 +353,7 @@
 	\end{split}
 	\end{align*}
 	Note that when the graph is undirected we don't have "forward edge" and "cross edge". Because they are equivalent to "back edge" and "tree edge" respectively.
-	\begin{table*}
+	\begin{table*}[h!]
 		\centering
 		\caption{Directed graph}
 		\begin{tabular}{r|c|c|c}
@@ -366,7 +366,7 @@
 			black & impossible & back & tree, back, forward, cross \\
 		\end{tabular}
 	\end{table*}
-	\begin{table*}
+	\begin{table*}[h!]
 		\centering
 		\caption{Undirected graph}
 		\begin{tabular}{r|c|c|c}
@@ -427,7 +427,7 @@
 	\text{\textbf{Cross edge: }} v.d &< v.f < u.d < u.f \\
 	\end{split}
 	\end{align*}
-	As you can see only in cross edge the discovery of one endpoint is after the other finished. We need to prove that if there is a path from $u$ to $v$, it is possible to have $v.d > u.f$. In other words, edge $(v, u)$ is a cross edge and there is a path from $u$ to $v$ in which there is at least one edge which is not a tree edge. We can make counterexample even simpler by removing the cross edge. Note that the root of DFS tree is vertex $s$.
+	As you can see only in cross edge the discovery of one endpoint is after the other finished. We need to prove that if there is a path from $u$ to $v$, it is possible to have $v.d > u.f$. In other words, edge $(v, u)$ is a cross edge and there is a path from $u$ to $v$ in which there is at least one edge which is not a tree edge. We can make counterexample even simpler by removing the cross edge. Note that the root of DFS tree is vertex $s$. In general if there is a cycle from $s$ to $u$ and $u$ to $s$, then it is possible $v.d > u.f$.
 	
 	\begin{figure*}[h!]
 		\centering
@@ -461,8 +461,28 @@
 		\draw[edge] (s) -- (v) node[midway, above, rotate=45] {T};
 		\draw[edge] (u) edge[bend right] node [midway, above, rotate=-45] {B} (s);				
 		\end{tikzpicture}		
-	\end{figure*}	
+	\end{figure*}
+	\begin{figure*}[h!]
+		\centering
+		\caption{General counterexample}
+		\begin{tikzpicture}
+		\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
+		\tikzset{edge/.style = {->,> = latex'}}
+		\tikzset{snake it/.style={-stealth,
+				decoration={snake, 
+					amplitude = .4mm,
+					segment length = 2mm,
+					post length=0.9mm},decorate}}			
+		% vertices
+		\node[vertex] (s) at (0, 0) {$s$};
+		\node[vertex] (u) at (2, -2) {$u$};
+		\node[vertex] (v) at (-2, -2) {$v$};
+		% edges
+		\path[edge] (s) edge[bend left, snake it] (u);
+		\path[edge] (s) edge[snake it] (v);
+		\path[edge] (u) edge[bend left, snake it](s);				
+		\end{tikzpicture}		
+	\end{figure*}		
 	\FloatBarrier
-	\paragraph{Excercise 10}
 	
 \end{document}
