@@ -8,6 +8,11 @@
 \usepackage{hyperref}
 \usepackage{placeins}
 
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{snakes}
+\usetikzlibrary{decorations.pathmorphing}
+
 \hypersetup{
 	colorlinks,
 	citecolor=black,
@@ -313,4 +318,151 @@
 		indegree(i) + outdegree(i) & i = j
 		\end{cases}
 	\end{equation*}
+	\section{Breadth-first search}
+	\paragraph{Exercise 8}
+	It is easy to prove that the first and last vertex of the diameter is a leaf. Choose an arbitrary vertex $s$ and perform BFS on the graph. The vertex that has maximum number of edges from $s$ is one of the diameter's endpoints which we call it $u$. Then run another BFS from $u$ to get vertex $v$ which has maximum number of edges from $u$. This is the diameter.
+	\paragraph{exercise 9}
+	This undirected graph is equivalent to a directed graph which for all $u, v \in V$, $(u, v), (v, u) \in E$. We can use a modified version of DFS. Because we have both edges $(u, v)$ and $(v, u)$, we don't have "cross edges". We need to choose between "forward edges" or "back edges". In the following algorithm we use "forward edges" and skip "back edges".
+	\begin{algorithm*}
+		\begin{algorithmic}[1]
+			\Function{DFS}{G, u}
+				\State $u.color \gets Gray$
+				\State $paths \gets \phi$
+				\ForAll{$v \in G.Adj[u]$}
+					\If{$v.color = White$} \Comment{Tree edge}
+						\State $paths \gets \{(u, v)\} \cup DFS(G, v) \cup \{(v, u)\}$
+					\ElsIf{$v.color = Black$} \Comment{Forward edge}
+						\State $paths \gets paths \cup \{u, v\} \cup \{v, u\}$
+					\EndIf
+				\EndFor
+				\State $u.color \gets Black$
+				\State \Return paths
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	\section{Depth-first search}
+	\paragraph{Exercise 1}
+	You can use the following facts. Suppose we have edge (u, v) and we consider loops as back edges.
+	\begin{align*}	
+	\begin{split}
+		\text{\textbf{Tree edge: }} u.d &< v.d < v.f < u.f \\
+		\text{\textbf{Forward edge: }} u.d &< v.d < v.f < u.f \\
+		\text{\textbf{Back edge: }} v.d &\le u.d < u.f \le v.f \\
+		\text{\textbf{Cross edge: }} v.d &< v.f < u.d < u.f \\
+	\end{split}
+	\end{align*}
+	Note that when the graph is undirected we don't have "forward edge" and "cross edge". Because they are equivalent to "back edge" and "tree edge" respectively.
+	\begin{table*}
+		\centering
+		\caption{Directed graph}
+		\begin{tabular}{r|c|c|c}
+			& white & gray & black \\
+			\hline
+			white & tree, back, forward, cross & back, cross & cross \\
+			\hline
+			gray & tree, forward  & tree, back, forward & tree, forward, cross \\
+			\hline
+			black & impossible & back & tree, back, forward, cross \\
+		\end{tabular}
+	\end{table*}
+	\begin{table*}
+		\centering
+		\caption{Undirected graph}
+		\begin{tabular}{r|c|c|c}
+			& white & gray & black \\
+			\hline
+			white & tree, back & tree, back & impossible \\
+			\hline
+			gray & tree, back & tree, back & tree, back\\
+			\hline
+			black & impossible & tree, back & tree, back \\
+		\end{tabular}
+	\end{table*}
+	\FloatBarrier
+	\paragraph{Excercise 8}
+	We need to show some examples which there is only one path from $u$ to $v$ and at least of one the edges in this path is not a tree edge. In the following examples the root of DFS trees is vertex $s$.
+	\begin{figure*}[h!]
+		\centering
+		\caption{Counterexample using back edge}
+		\begin{tikzpicture}		
+			\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
+			\tikzset{edge/.style = {->,> = latex'}}
+			% vertices
+			\node[vertex] (s) at (0, 0) {$s$};
+			\node[vertex] (v) at (2, -2) {$v$};
+			\node[vertex] (w) at (4, -4) {$w$};
+			\node[vertex] (u) at (0, -4) {$u$};
+			% edges
+			\draw[edge] (s) -- (v) node[midway, above, rotate=-45] {T};
+			\draw[edge] (v) -- (w) node[midway, above, rotate=-45] {T};
+			\draw[edge] (w) -- (u) node[midway, above] {T};
+			\draw[edge] (u) -- (v) node[midway, above, rotate=45] {B};
+		\end{tikzpicture}
+	\end{figure*}	
+	\begin{figure*}[h!]
+		\centering
+		\caption{Counterexample using cross edge}
+		\begin{tikzpicture}
+			\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
+			\tikzset{edge/.style = {->,> = latex'}}
+			% vertices
+			\node[vertex] (s) at (0, 0) {$s$};
+			\node[vertex] (u) at (2, -2) {$u$};
+			\node[vertex] (v) at (-2, -2) {$v$};
+			% edges
+			\draw[edge] (s) -- (u) node[midway, above, rotate=-45] {T};
+			\draw[edge] (u) -- (v) node[midway, above] {C};
+			\draw[edge] (s) -- (v) node[midway, above, rotate=45] {T};
+		\end{tikzpicture}
+	\end{figure*}
+	\FloatBarrier
+	\paragraph{Excercise 9}
+	Suppose we have edge (u, v) and we consider loops as back edges.
+	\begin{align*}	
+	\begin{split}
+	\text{\textbf{Tree edge: }} u.d &< v.d < v.f < u.f \\
+	\text{\textbf{Forward edge: }} u.d &< v.d < v.f < u.f \\
+	\text{\textbf{Back edge: }} v.d &\le u.d < u.f \le v.f \\
+	\text{\textbf{Cross edge: }} v.d &< v.f < u.d < u.f \\
+	\end{split}
+	\end{align*}
+	As you can see only in cross edge the discovery of one endpoint is after the other finished. We need to prove that if there is a path from $u$ to $v$, it is possible to have $v.d > u.f$. In other words, edge $(v, u)$ is a cross edge and there is a path from $u$ to $v$ in which there is at least one edge which is not a tree edge. We can make counterexample even simpler by removing the cross edge. Note that the root of DFS tree is vertex $s$.
+	
+	\begin{figure*}[h!]
+		\centering
+		\caption{Counterexample using cross edge}
+		\begin{tikzpicture}
+			\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
+			\tikzset{edge/.style = {->,> = latex'}}
+			% vertices
+			\node[vertex] (s) at (0, 0) {$s$};
+			\node[vertex] (u) at (2, -2) {$u$};
+			\node[vertex] (v) at (-2, -2) {$v$};
+			% edges
+			\draw[edge] (s) -- (u) node[midway, above, rotate=-45] {T};
+			\draw[edge] (v) -- (u) node[midway, above] {C};
+			\draw[edge] (s) -- (v) node[midway, above, rotate=45] {T};
+			\draw[edge] (u) edge[bend right] node [midway, above, rotate=-45] {B} (s);
+		\end{tikzpicture}		
+	\end{figure*}
+	\begin{figure*}[h!]
+		\centering
+		\caption{Counterexample without cross edge}
+		\begin{tikzpicture}
+		\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
+		\tikzset{edge/.style = {->,> = latex'}}
+		% vertices
+		\node[vertex] (s) at (0, 0) {$s$};
+		\node[vertex] (u) at (2, -2) {$u$};
+		\node[vertex] (v) at (-2, -2) {$v$};
+		% edges
+		\draw[edge] (s) -- (u) node[midway, above, rotate=-45] {T};
+		\draw[edge] (s) -- (v) node[midway, above, rotate=45] {T};
+		\draw[edge] (u) edge[bend right] node [midway, above, rotate=-45] {B} (s);				
+		\end{tikzpicture}		
+	\end{figure*}	
+	\FloatBarrier
+	\paragraph{Excercise 10}
+	
 \end{document}
