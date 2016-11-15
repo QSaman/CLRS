@@ -115,9 +115,34 @@
 	\section{Elements of dynamic programming}
 	\paragraph{Exercise 2}
 	Each node is filled with (p, r). p is the index of leftmost element and r is the index of rightmost element of array which the subprolem wants to sort. As you can see there is no overlapping between subproblems so dynamic programming is not a good idea for merge sort. In other words, we don't see a previously solved subproblem again and we only waste memory. As a general rule if the subproblem graph is a tree, dynamic programming cannot be applied.
-	\begin{figure}[h!]
-		\includegraphics[width=\linewidth]{images/15/15-3-2.png}
-	\end{figure}
+	\begin{figure*}[h!]
+		\centering
+		\begin{tikzpicture}[level/.style={sibling distance=60mm/#1}]
+		\tikzset{vertex/.style = {shape=circle,draw,scale=0.7}}
+			\node[vertex] (a){$1, 16$}
+				child {node[vertex] (b) {$1, 8$}
+						child {node[vertex] (d) {$1, 4$}
+							child {node[vertex] (h) {$1, 2$}}
+							child {node[vertex] (i) {$3, 4$}}
+							}
+						child {node[vertex] (e) {$5, 8$}
+							child {node[vertex] (j){$5, 6$}}
+							child {node[vertex] (k){$7, 8$}}
+							}
+					}
+				child {node[vertex] (c) {$9, 16$}
+					child {node[vertex] (f) {$9, 12$}
+						child {node[vertex] (l){$9, 10$}}
+						child {node[vertex] (m){$11, 12$}}
+						}
+					child {node[vertex] (g) {$13, 16$}
+						child {node[vertex] (n){$13, 14$}}
+						child {node[vertex] (o){$15, 16$}}
+						}
+					}
+				;
+		\end{tikzpicture}
+	\end{figure*}
 	\chapter{Amortized Analysis}
 	\section{Aggregate analysis}
 	\paragraph{Exercise 1}
