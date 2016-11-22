@@ -344,6 +344,58 @@
 		\end{cases}
 	\end{equation*}
 	\section{Breadth-first search}
+	\paragraph{Exercise 7}
+	We need to determine whether an undirected graph is bipartite or not. We can paint the vertices of a bipartite graph with two colors in such a way that no two adjacent vertices share the same color.\\
+	We can easily prove that if there is a cycle in graph in which the number of edges is odd, then the graph cannot be bipartite. \\
+	We can use BFS. We know that in an undirected graph we can only have tree and back edges (see \ref{psec:EdgeClassification}). We run BFS on an arbitrary vertex $s$. Suppose $u$ is reachable from $s$. If $u.d$ is even we color that vertex "blue" otherwise we color it "red". For tree edges we don't have any problem. We need to think about back edges. \\
+	Suppose $(u, v)$ is a back edge. Since we discover $v$ first we can say $v.d \le u.d$. We know that $(v, u)$ is also an edge. According to BFS properties $u.d \le v.d + 1$. Hence $0 \le u.d - v.d \le 1$. If $u.d = v.d + 1$, then $u$ and $v$ have different colors. So we only need to consider $u.d = v.d$. In that case both $u$ and $v$ have the same color and we need to prove that this graph cannot be bipartite. When we have a back edge it means that we have a cycle. The number of edges in this cycle is $u.d + v.d + 1 = 2 \times u.d + 1$ which is odd. So the graph cannot be bipartite. Note that the graph can have more than one connected component so it is possible we need to run BFS more than once. We use a new attribute $u.bColor$ which we use for bipartite color as described.
+	\begin{algorithm*}[h!]
+		\caption{Determining whether a graph is bipartite or not}
+		\begin{algorithmic}[1]
+			\Function{IsBipartiteGraph}{G}
+				\ForAll{$u \in G.V$}
+					\State $u.color = WHITE$
+					\State $u.d = \infty$
+					\State $u.\pi = NIL$
+				\EndFor
+				\ForAll{$u \in G.V$}
+					\If{$u.color == WHITE\text{ }\land$ \Call{BFS}{G, u}$\text{ } == FALSE$}
+						\State \Return $FALSE$
+					\EndIf
+				\EndFor	
+				\State \Return $TRUE$
+			\EndFunction		
+		\end{algorithmic}
+		\begin{algorithmic}
+			\Statex
+		\end{algorithmic}
+		\begin{algorithmic}[1]		
+			\Function{BFS}{G, s}
+				\State $s.color = GRAY$
+				\State $s.bColor = 0$ \Comment The color which we use for bipartite algorithm
+				\State $s.d = 0$
+				\State $Q = \emptyset$
+				\State \Call{Enqueue}{Q, s}
+				\While{$Q \ne \emptyset$}
+					\State $u = $ \Call{Dequeue}{Q}
+					\ForAll{$v \in G.adj[u]$}
+						\If{$v.color == WHITE$} \Comment edge $(u, v)$ is a tree edge
+							\State $v.color = GRAY$
+							\State $v.bColor = 1 - u.bColor$
+							\State $v.d = u.d + 1$
+							\State $v.\pi = u$
+							\State \Call{Enqueue}{Q, v}
+						\ElsIf{u.bColor == v.bColor} \Comment edge $(u, v)$ is a back edge
+							\State \Return $FALSE$
+						\EndIf
+					\EndFor
+					\State $u.color = BLACK$
+				\EndWhile
+				\State \Return $TRUE$
+			\EndFunction
+		\end{algorithmic}				
+	\end{algorithm*}
+	\FloatBarrier
 	\paragraph{Exercise 8}
 	It is easy to prove that the first and last vertex of the diameter is a leaf. Choose an arbitrary vertex $s$ and perform BFS on the graph. The vertex that has maximum number of edges from $s$ is one of the diameter's endpoints which we call it $u$. Then run another BFS from $u$ to get vertex $v$ which has maximum number of edges from $u$. This is the diameter.
 	\paragraph{exercise 9}
@@ -367,6 +419,89 @@
 	\end{algorithm*}
 	\FloatBarrier
 	\section{Depth-first search}
+	\phantomsection
+	\label{psec:EdgeClassification}
+	\paragraph{Edge classification}
+	Suppose $s$ is the root of DFS or BFS tree.
+	\begin{itemize}
+		\item \textbf{Tree edge}
+		\begin{itemize}
+			\item Directed graph
+			\begin{itemize}
+				\item DFS: We can have tree edges
+				\item BFS: We can have tree edges
+			\end{itemize}
+			\item Undirected graph
+			\begin{itemize}
+				\item DFS: We can have tree edges
+				\item BFS: We can have tree edges
+			\end{itemize}				
+		\end{itemize}
+		\item \textbf{Forward edge}
+		\begin{itemize}
+			\item Directed graph
+			\begin{itemize}
+				\item DFS: We can have forward edges
+				\item BFS: We can't have forward edges. Suppose we can have forward edge $(u, v)$. According to forward edge properties we can say $u.d < v.d$ (if $u.d = v.d$ it's cross edge) and according to BFS properties $v.d \le u.d + 1$. Hence $0 < v.d - u.d \le 1$. If $v.d = u.d + 1$ it is a tree edge, unless we have a multigraph. So $(u, v)$ cannot be a forward edge.
+			\end{itemize}
+			\item Undirected graph
+			\begin{itemize}
+				\item DFS: We can't have forward edges
+				\item BFS: We can't have forward edges
+			\end{itemize}				
+		\end{itemize}
+		\item \textbf{Back edge}
+		\begin{itemize}
+			\item Directed graph
+			\begin{itemize}
+				\item DFS: We can have back edges
+				\item BFS: We can have back edges. Suppose $(u, v)$ is a back edge. Since we discover $v$ first we can say $v.d \le u.d$. According to BFS properties we can say $v.d \le u.d + 1$. Hence $v.d -u.d \le 1$. Note that we have only upper bound. So it is possible $v.d - u.d < 0$
+			\end{itemize}
+			\item Undirected graph
+			\begin{itemize}
+				\item DFS: We can have back edges
+				\item BFS: We can have back edges. Suppose $(u, v)$ is a back edge. Since we discover $v$ first we can say $v.d \le u.d$. We know that $(v, u)$ is also an edge. According to BFS properties $u.d \le v.d + 1$. Hence $0 \le u.d - v.d \le 1$
+			\end{itemize}
+		\end{itemize}
+		\item \textbf{Cross edge}
+		\begin{itemize}
+			\item Directed graph
+			\begin{itemize}
+				\item DFS: We can have cross edges
+				\item BFS: We can have cross edges. Suppose $(u, v)$ is a cross edge. Since we discover $v$ first we can say $v.d \le u.d$. According to BFS properties we can say $v.d \le u.d + 1$. Hence $v.d - u.d \le 1$. Note that we only have upper bound. It is possible that $v.d - u.d < 0$. See figure \ref{fig:BfsCrossEdgeDirectedGraph}
+			\end{itemize}
+			\item Undirected graph
+			\begin{itemize}
+				\item DFS: We can't have cross edges
+				\item BFS: We can't have cross edges
+			\end{itemize}
+		\end{itemize}		
+	\end{itemize}
+	\begin{figure*}[h!]
+		\centering
+		\caption{BFS -- cross edge in a directed graph. $v.d \le u.d + 1$}
+		\label{fig:BfsCrossEdgeDirectedGraph}
+		\begin{tikzpicture}
+		\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+		\tikzset{edge/.style={->, > = latex'}}
+		\tikzset{snake it/.style={-stealth,
+				decoration={snake, 
+					amplitude = 1mm,
+					segment length = 8mm,
+					post length=0.9mm},decorate}}
+		%vertices
+		\node[vertex] (s) at (0, 2) {$s$};
+		\node[vertex] (w) at (0, 0) {$w$};
+		\node[vertex] (u) at (0, -2) {$u$};
+		\node[vertex] (v) at (-1, -1) {$v$};
+		%edges
+		\path[edge] (s) edge[snake it] node[midway, above, rotate=-90]{$T$} (w);
+		\path[edge] (w) edge[snake it, bend left] node[midway, above, rotate=-45]{$T$} (u);
+		\draw[edge] (w) -- (v) node[midway, above, rotate=45]{$T$};
+		\draw[edge] (u) -- (v) node[midway, above, rotate=-45]{$C$};
+		\end{tikzpicture}
+	\end{figure*}
+	\FloatBarrier	
 	\paragraph{Exercise 1}
 	You can use the following facts. Suppose we have edge (u, v) and we consider loops as back edges.
 	\begin{align*}	
@@ -406,41 +541,58 @@
 	\end{table*}
 	\FloatBarrier
 	\paragraph{Excercise 8}
-	We need to show some examples which there is only one path from $u$ to $v$ and at least of one the edges in this path is not a tree edge. In the following examples the root of DFS trees is vertex $s$.
+	We need to show some examples which there is only one path from $u$ to $v$ and at least of one the edges in this path is non-tree edge. Without loss of generality, suppose in this path except $e = (w, x)$ which is a non-tree edge, all other edges are tree ones. We consider all possible types.
+	\begin{figure*}[h!]
+		\centering
+		\caption{Edge e = (w, x) is a non-tree edge}
+		\begin{tikzpicture}
+			\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+			\tikzset{edge/.style={->, > = latex'}}
+		\tikzset{snake it/.style={-stealth,
+				decoration={snake, 
+					amplitude = 1mm,
+					segment length = 8mm,
+					post length=0.9mm},decorate}}
+			%vertices
+			\node[vertex] (u) at (0, 0) {$u$};
+			\node[vertex] (w) at (4, 0) {$w$};
+			\node[vertex] (x) at (6, 0) {$x$};
+			\node[vertex] (v) at (10, 0) {$v$};
+			%edges
+			\path[edge] (u) edge[snake it] node[midway, above]{$T$} (w);
+			\draw[edge] (w) -- (x) node[midway, above]{$\ne T$};
+			\path[edge] (x) edge[snake it] node[midway, above]{$T$} (v);
+		\end{tikzpicture}
+	\end{figure*}
+	\begin{itemize}
+		\item \textbf{Forward Edge:} If $(w, x)$ is forward ege, then $w$ is an ancestor of $x$ which leads to $v$ be a descendant of $u$. So it cannot be a forward edge
+		\item \textbf{Cross edge:} If $(w, x)$ is a cross edge, then $x$ finishes before the discovery of $w$. In other words, all reachable vertices from $x$, including $v$, will be discover before $w$ and $u$. So it cannot be a cross edge
+		\item \textbf{Back edge:} Consider the following example which the root of DFS tree is vertex $x$ and it discover $u$ before $v$.
 	\begin{figure*}[h!]
 		\centering
 		\caption{Counterexample using back edge}
-		\begin{tikzpicture}		
-			\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
-			\tikzset{edge/.style = {->,> = latex'}}
-			% vertices
-			\node[vertex] (s) at (0, 0) {$s$};
-			\node[vertex] (v) at (2, -2) {$v$};
-			\node[vertex] (w) at (4, -4) {$w$};
-			\node[vertex] (u) at (0, -4) {$u$};
-			% edges
-			\draw[edge] (s) -- (v) node[midway, above, rotate=-45] {T};
-			\draw[edge] (v) -- (w) node[midway, above, rotate=-45] {T};
-			\draw[edge] (w) -- (u) node[midway, above] {T};
-			\draw[edge] (u) -- (v) node[midway, above, rotate=45] {B};
-		\end{tikzpicture}
-	\end{figure*}	
-	\begin{figure*}[h!]
-		\centering
-		\caption{Counterexample using cross edge}
 		\begin{tikzpicture}
-			\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
-			\tikzset{edge/.style = {->,> = latex'}}
-			% vertices
-			\node[vertex] (s) at (0, 0) {$s$};
-			\node[vertex] (u) at (2, -2) {$u$};
-			\node[vertex] (v) at (-2, -2) {$v$};
-			% edges
-			\draw[edge] (s) -- (u) node[midway, above, rotate=-45] {T};
-			\draw[edge] (u) -- (v) node[midway, above] {C};
-			\draw[edge] (s) -- (v) node[midway, above, rotate=45] {T};
-		\end{tikzpicture}
-	\end{figure*}
+		\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+		\tikzset{edge/.style={->, > = latex'}}
+		\tikzset{snake it/.style={-stealth,
+				decoration={snake, 
+					amplitude = 1mm,
+					segment length = 8mm,
+					post length=0.9mm},decorate}}			
+					%vertices
+					\node[vertex] (s) at (6, 0) {$x$};
+					\node[vertex] (u) at (0, 0) {$u$};
+					\node[vertex] (w) at (4, 0) {$w$};
+					\node[vertex] (v) at (10, 0) {$v$};
+					%edges
+					\path[edge] (s) edge[snake it, bend left] node[midway, above] {T} (u);
+					\path[edge] (u) edge[snake it] node[midway, above] {T} (w);
+					\draw[edge] (w) -- (s) node[midway, above]{B};
+					\path[edge] (s) edge[snake it] node[midway, above]{T}(v);
+					
+					\end{tikzpicture}
+					\end{figure*}		
+	\end{itemize}
 	\FloatBarrier
 	\paragraph{Excercise 9}
 	Suppose we have edge (u, v) and we consider loops as back edges.
@@ -509,5 +661,151 @@
 		\end{tikzpicture}		
 	\end{figure*}		
 	\FloatBarrier
+	\paragraph{Exercise 10}
+	In an undirected graph forward edges are equivalent to back edges and cross edges are equivalent to tree edges. Although the following modification works for both directed and undirected graph, you can remove portion of code that is related to "forward" and "cross" edges to save space.
+	\begin{algorithm*}
+		\begin{algorithmic}[1]
+			\Function {DFS-VISIT}{G, u}
+				\State $time = time + 1$
+				\State $u.d = time$
+				\State $u.color = GRAY$
+				\ForAll{$v \in G.adj[u]$}
+					\If{$v.color == WHITE$} \Comment edge $(u, v)$ is a tree edge
+						\State \Call{PRINT-EDGE}{u, v, TREE}
+						\State $v.\pi = u$
+						\State \Call{DFS-VISIT}{$G, v$}
+					\ElsIf{$v.color == GRAY$} \Comment edge $u, v$ is a back edge
+						\State \Call{PRINT-EDGE}{u, v, BACK}
+					\ElsIf{$u.d < v.d$}
+						\State \Call{PRINT-EDGE}{u, v, FORWARD}
+					\Else
+						\State \Call{PRINT-EDGE}{u, v, CROSS}
+					\EndIf
+				\EndFor
+				\State $u.color = BLACK$
+				\State $time = time + 1$
+				\State $u.f = time$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\paragraph{Exercise 11}
+	If both incoming and outgoing edges are cross, that happens. Consider the following example. Suppose DFS starts at $s$, then $u$ and finally at $w$.
+	\begin{figure*}[h!]
+		\begin{tikzpicture}
+			\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
+			\tikzset{edge/.style = {->,> = latex'}}
+			% vertices
+			\node[vertex] (s) at (0, 0) {$s$};
+			\node[vertex] (n) at (-1, -1) {$n$};
+			\node[vertex] (u) at (1, -1) {$u$};
+			\node[vertex] (w) at (2, 0) {$w$};
+			% edges
+			\draw[edge] (s) -- (n) node[midway, above, rotate=45] {T};
+			\draw[edge] (u) -- (s) node[midway, above, rotate=-45] {C};
+			\draw[edge] (w) -- (u) node[midway, above, rotate=45] {C};
+		\end{tikzpicture}
+	\end{figure*}
+	\FloatBarrier
+	\paragraph{Exercise 12}
+	There exists at least one path between every two vertices in a connected component. So if we perform DFS on an arbitrary vertex $u$, it will discover all reachable vertices from $u$. After DFS visit all vertices in $u$'s connected component it terminates. So the number of DFS trees is equal to the number of connect components in undirected graph. This is not true for directed graphs. Consider figure \ref{fig:NonSinglyConnectedGraph}. If we start from $u$ we only have one DFS tree. But if we start from $v$, $x_1$, $x_2$, $x_3$, $x_4$ and finally $u$, the number of DFS trees are equal to the number of vertices. In other words, all DFS trees are consist of only a vertex and we don't have any tree edges.
 	
+	\begin{algorithm}[h!]
+		\caption{Connected components in an undirected graph}
+		\begin{algorithmic}[1]
+			\Function{DFS}{G}
+				\ForAll{$u \in G.V$}
+					\State $u.color = WHITE$
+					\State $u.\pi = NIL$
+				\EndFor
+				\State $time = 0$
+				\State $ccn = 0$ \Comment $ccn$ is the number of connected components
+				\ForAll{$u \in G.V$}
+					\If{u.color == WHITE}
+						\State $ccn = ccn + 1$					
+						\State \Call{DFS-VISIT}{G, u}
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+		\begin{algorithmic}
+			\Statex
+		\end{algorithmic}	
+		\begin{algorithmic}[1]
+			\Function {DFS-VISIT}{G, u}
+			\State $time = time + 1$
+			\State $u.d = time$
+			\State $u.cc = ccn$
+			\State $u.color = GRAY$
+			\ForAll{$v \in G.adj[u]$}
+			\If{$v.color == WHITE$}
+			\State $v.\pi = u$
+			\State \Call{DFS-VISIT}{$G, v$}
+			\EndIf
+			\EndFor
+			\State $u.color = BLACK$
+			\State $time = time + 1$
+			\State $u.f = time$
+			\EndFunction			
+		\end{algorithmic}
+	\end{algorithm}
+	\FloatBarrier
+	\paragraph{Exercise 13}
+	It is obvious that we should only have tree and back edges. It is important to start from the right vertex. Consider figure \ref{fig:NonSinglyConnectedGraph}. There is exactly two distinct paths between $u$ and $v$. If we start the DFS from $u$, in the first run we can detect that the graph is not singly connected.
+	\begin{figure}[h!]
+		\centering
+		\caption{non singly connected graph}
+		\label{fig:NonSinglyConnectedGraph}		
+		\begin{tikzpicture}
+		\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+		\tikzset{edge/.style={->, > = latex'}}
+		\tikzset{snake it/.style={-stealth,
+				decoration={snake, 
+					amplitude = 1mm,
+					segment length = 8mm,
+					post length=0.9mm},decorate}}
+		%vertices
+		\node[vertex] (u) at (0, 0) {$u$};
+		\node[vertex] (x3) at (1, 1) {$x_3$};
+		\node[vertex] (x4) at (1, -1) {$x_4$};
+		\node[vertex] (x1) at (3, 1) {$x_1$};
+		\node[vertex] (x2) at (3, -1) {$x_2$};
+		\node[vertex] (v) at (4, 0) {$v$};
+		%edges
+		\draw[edge] (u) -- (x3);
+		\draw[edge] (u) -- (x4);
+		\draw[edge] (x3) -- (x1);
+		\draw[edge] (x4) -- (x2);
+		\draw[edge] (x1) -- (v);
+		\draw[edge] (x2) -- (v);
+		\end{tikzpicture}
+	\end{figure}
+	I thought I can design an $O(V + E)$ algorithm to solve this problem. I was wrong.
+	\subparagraph{Wrong idea}
+	Start DFS from an arbitrary vertex $s$. If you found "forward" or "cross" edges then it is not singly connected so the algorithm terminates. After DFS finished, it is possible we have unvisited vertices.
+	\begin{itemize}
+		\item[] \textbf{component:} All undiscovered vertices which will be discover in one DFS run. For example if we run DFS from $x_3$ in figure \ref{fig:NonSinglyConnectedGraph}, $x_3$, $x_1$ and $u$ are belong to the same component.
+	\end{itemize}
+	We can determine and number the components (similar to connected components). If we find "forward" or "cross" edges within each component, the algorithm terminates. Note that "cross" edges between components is not trivial. We can have singly connected graph which has at least one cross edge between its components. We can create a new graph which its vertices are the components of input graph and its edges are the cross edges between components. Suppose in figure \ref{fig:NonSinglyConnectedGraph} we run DFS first on $x_3$, then $x_4$ and finally $u$. You can see the result in figure \ref{fig:GraphOfComponents}. This algorithm is not always correct. Suppose we run DFS first on $v$, $x_1$, $x_2$, $x_3$, $x_4$ and finally $u$. As you can see we don't have any tree edges and the graph of components is same as original one.
+	\begin{figure}[h!]
+		\centering
+		\caption{Graph of components}
+		\label{fig:GraphOfComponents}
+		\begin{tikzpicture}
+		\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+		\tikzset{edge/.style={->, > = latex'}}
+		\tikzset{snake it/.style={-stealth,
+				decoration={snake, 
+					amplitude = 1mm,
+					segment length = 8mm,
+					post length=0.9mm},decorate}}
+		%vertices
+		\node[vertex] (u) at (0, 0) {$u$};
+		\node[vertex] (x4) at (2, -2) {$x_4, x_2$};
+		\node[vertex] (v) at (4, 0) {$x_3, x_1, v$};
+		%edges
+		\draw[edge] (u) -- (v);
+		\draw[edge] (u) -- (x4);
+		\draw[edge] (x4) -- (v);
+		\end{tikzpicture}
+	\end{figure}	
 \end{document}
