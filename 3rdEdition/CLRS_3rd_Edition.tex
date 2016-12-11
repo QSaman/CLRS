@@ -397,7 +397,93 @@
 	\end{algorithm*}
 	\FloatBarrier
 	\paragraph{Exercise 8}
-	It is easy to prove that the first and last vertex of the diameter is a leaf. Choose an arbitrary vertex $s$ and perform BFS on the graph. The vertex that has maximum number of edges from $s$ is one of the diameter's endpoints which we call it $u$. Then run another BFS from $u$ to get vertex $v$ which has maximum number of edges from $u$. This is the diameter.
+	Suppose the maximum distance is path $p = (v_0, v_1, \dots, v_k)$ in which $u = v_0$ and $v = v_k$. Consider an arbitrary vertex $s$. We know that there is exactly one path between every two vertices in a tree. We have two cases.
+	\begin{enumerate}
+		\item $\boldsymbol{s \in p}$
+		\begin{figure}[h!]
+			\centering
+			\caption{$s \in p$}
+			\begin{tikzpicture}
+			\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+			\tikzset{snake it/.style={
+					decoration={snake, 
+						amplitude = 1mm,
+						segment length = 8mm,
+						post length=0.9mm},decorate}}
+			%vertices
+			\node[vertex] (u) at (0, 0) {$u$};
+			\node[vertex] (s) at (2, 0) {$s$};
+			\node[vertex] (v) at (4, 0) {$v$};
+			%edges
+			\path (u) edge[snake it] (s);
+			\path (s) edge[snake it] (v);
+			\end{tikzpicture}
+		\end{figure}		
+		\item $\boldsymbol{s \not \in p:}$ In this case there is exactly one path between $s$ and $w \in p - \{u\} - \{v\}$. For example if $w = u$ then the diameter is between $s$ and $v$.
+		\begin{figure}[h!]
+			\centering
+			\caption{$s \not\in p \land w \in p - \{u\} - \{v\}$}
+			\begin{tikzpicture}
+			\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+			\tikzset{snake it/.style={
+					decoration={snake, 
+						amplitude = 1mm,
+						segment length = 8mm,
+						post length=0.9mm},decorate}}
+			%vertices
+			\node[vertex] (u) at (0, 0) {$u$};
+			\node[vertex] (w) at (2, 0) {$w$};
+			\node[vertex] (v) at (4, 0) {$v$};
+			\node[vertex] (s) at (2, 2) {$s$};
+			%edges
+			\path (u) edge[snake it] (w);
+			\path (w) edge[snake it] (v);
+			\path (s) edge[snake it] (w);			
+			\end{tikzpicture}
+		\end{figure}		
+	\end{enumerate}
+	If we run BFS on $s$, then $\max\limits_{x \in G.V}(x.d)$ belongs to either $u$ or $v$. Otherwise the diameter is not between $u$ and $v$. Without loss of generality suppose it is $u.d = \max\limits_{x \in G.V}(x.d)$. Then we run another BFS on $u$ to get $v$ in a similar manner. The running time of algorithm is $O(2V + 2E) = O(V + E)$. Since in a tree $|E| = |V| - 1$ the running time is $O(V)$.
+	\begin{algorithm}[h!]
+		\begin{algorithmic}[1]
+			\Function{FindDiameter}{G}
+			\State Let $s$ be an arbitrary vertex such that  $s \in G.V$
+			\State \Call{InitBFS}{G}
+			\State u = \Call{BFS}{G, s}
+			\State \Call{InitBFS}{G}
+			\State v = \Call{BFS}{G, u}
+			\State \Return $u, v, v.d$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm}
+	\begin{algorithm}[h!]		
+		\begin{algorithmic}[1]
+			\Function{BFS}{G, s}			
+				\State $s.color = GRAY$
+				\State $s.d = 0$
+				\State $Q = \emptyset$
+				\State \Call{Enqueue}{Q, s}
+				\State $max = -\infty$
+				\While{$Q \ne \emptyset$}
+					\State $u = $ \Call{Dequeue}{Q}
+					\ForAll{$v \in G.adj[u]$}
+						\If{$v.color == WHITE$}
+							\State $v.color = GRAY$
+							\State $v.d = u.d + 1$
+							\If{$v.d > max$}
+								\State $max = v.d$
+								\State $z = v$
+							\EndIf
+							\State $v.\pi = u$
+							\State \Call{Enqueue}{Q, v}
+						\EndIf
+					\EndFor
+					\State $u.color = BLACK$
+					\EndWhile
+					\State \Return $z$
+			\EndFunction																				
+		\end{algorithmic}	
+	\end{algorithm}
+	\FloatBarrier	
 	\paragraph{exercise 9}
 	This undirected graph is equivalent to a directed graph which for all $u, v \in V$, $(u, v), (v, u) \in E$. We can use a modified version of DFS. Because we have both edges $(u, v)$ and $(v, u)$, we don't have "cross edges". We need to choose between "forward edges" or "back edges". In the following algorithm we use "forward edges" and skip "back edges".
 	\begin{algorithm*}
@@ -807,5 +893,335 @@
 		\draw[edge] (u) -- (x4);
 		\draw[edge] (x4) -- (v);
 		\end{tikzpicture}
-	\end{figure}	
+	\end{figure}
+	\chapter{Minimum Spanning Trees}
+	For questions similar to Prim's minimum spanning tree see "Variants" in chapter \ref{psec:ShortestPathClassification}.
+	\section{Problems}
+	\paragraph{Problem 3 Bottleneck spanning tree}
+	\subparagraph{a.}
+	Consider an arbitrary MST $T$. Suppose the maximum-weight edge in $T$ is $e$. If we remove that edge we have a forest of two trees $C_1$ and $C_2$. Now consider MST $T'$ whose maximum-weight edge, $e'$, is less that $e$. There should be an edge in $T'$ that connects $C_1$ to $C_2$. The weight of that edge should be less than $e$. In other words, $e$ is not a light edge which contradicts $T$ is an MST.
+	\subparagraph{b.}
+	We remove all edges in $G.E$ which their weight are higher than $b$. We called the modified graph $G_b$. It is obvious that $G_b.V = G.V$ and $G_b.E = \{(u, v) \in G.E : w(u, v) \le b\}$. If $G_b$ remains connected then every spanning tree of $G_b$ doesn't have an edge whose weight is greater than b. The running time of this algorithm is $O(V + E)$. Since G should be a connected graph, $|E| \ge |V| - 1$. So we can say the running time is $O(E)$.
+	\begin{algorithm*}[h1]
+		\begin{algorithmic}[1]
+			\Function{VALID-BST-VALUE}{G, b}
+				\State $G' = $ \Call{REMOVE-EDGES}{G, b}
+				\State \Call{InitDFS}{$G'$}
+				\State $c = 0$ \Comment The number of connected components
+				\ForAll{$u \in G'.V$}
+					\If{$u.color == WHITE$}
+						\State $c = c + 1$
+						\State \Call{DFS}{$G'$, u}
+					\EndIf
+				\EndFor
+				\State \Return $(c == 1)$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\begin{algorithm*}[h1]
+		\begin{algorithmic}[1]
+			\Function{REMOVE-EDGES}{G, b}
+				\State $G_b.V = G.V$
+				\State $G_b.E = \emptyset$
+				\ForAll{$(u, v) \in G.E$}
+					\If{$(u, v).c \le b$} \Comment $(u, v).c \equiv w(u, v)$
+						\State $G_b.E = G_b.E \cup \{(u, v)\}$
+					\EndIf					
+				\EndFor
+				\State \Return $G_b$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}		
+	\FloatBarrier
+	\subparagraph{c.}
+	We need some definitions:
+	\begin{itemize}
+		\item $\boldsymbol{G_b:}$ a new sub-graph of $G$ which $G_b.V = G.V$ and $G_b.E = \{(u, v) \in G.E : w(u, v) \le b\}$
+		\item $\boldsymbol{comp(u):}$ Suppose connected components $c_1, c_2, \dots, c_k$ make the Graph $G_b$ and vertex $u$ belongs to the i\textsuperscript{th} component. Then $comp(u) = i$
+		\item $\boldsymbol{G'_b:}$ Suppose $C = \{c_1, c_2, \dots, c_k\}$ is the set of connected components of $G_b$. Then $G'_b.V = C$ and $G'_b.E = \{(u, v) \in G.E : comp(u) \ne comp(v)\}$. It is possible that there are more than one edge between $c_i$ and $c_j$. In this case we choose the light edge (minimum weight)
+	\end{itemize}
+	We want to find $b_{m} = \min\limits_{b \in G.E \land |G'_b.V| = 1}(b)$. In other words, we want to find the minimum of $b \in G.E$ which $G_b$ is a connected graph. Consider an arbitrary edge $(u, v)$. Suppose $w(u, v) = b$ There are two cases:
+	\begin{enumerate}
+		\item $\boldsymbol{G_b}$\textbf{ is connected:} It means $b_m < b$. More precisely, $b_m \in G_b.E$
+		\item $\boldsymbol{G_b}$\textbf{ is not connected:} It means $b_m \ge b$. More precisely, $b_m \in G'_b.E$. 
+	\end{enumerate}
+	Consider set $W = {w(u, v) : (u, v) \in G.E}$. We can find the median of $W$ in $O(E)$ by "median of medians" algorithm. After finding the median, we can divide the edges into two equal sets: $G_b.E$ and $G'_b.E$. In each step we eliminate half of edges. For simplicity we assume edge $(u, v)$ has an attribute $c$ such that $(u, v).c = w(u, v)$.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BST}{G}
+				\If{$|G.E| == 1$}
+					\State \Return $G.E$
+				\EndIf
+				\State $m = $ \Call{FIND-MEDIAN}{$G.E$} \Comment $O(E)$
+				\If{\Call{VALID-BST-VALUE}{G, m}}
+					\State $G_b = $ \Call{REMOVE-EDGES}{G, m} \Comment $O(E)$
+					\State $R = $ \Call{BST}{$G_b$}
+				\Else
+					\State $G'_b = $ \Call{MAKE-$G'_b$}{G} \Comment $O(E)$
+					\State $R = $ \Call{BST}{$G'_b$}
+				\EndIf
+				\State \Return $R$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{MAKE-$G'_b$}{G}
+				\State C, comp = \Call{CC}{G}
+				\State $G'_b.V = C$
+				\ForAll{$(u, v) \in G.E$}
+					\If{$comp[u] \ne comp[v]$}
+						\If{$(comp[u], comp[v]) \not\in G'_b.E$}
+							\State $(comp[u], comp[v]).c = (u, v).c$
+							\State $G'_b.E = G'_b.E \cup \{(comp[u], comp[v])\}$
+						\ElsIf{$(u, v).c < (comp[u], comp[v]).c$}
+							\State $(comp[u], comp[v]).c = (u, v).c$
+						\EndIf
+					\EndIf
+				\EndFor
+				\State \Return $G'_b$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{CC}{G}
+				\State Let $comp[1..G.V]$ be a new array
+				\State $C = \emptyset$ \Comment The set of connected components
+				\State $c = 0$ \Comment The number of connected components
+				\State \Call{INIT-DFS}{G}
+				\ForAll{$u \in G.V$}
+					\If{$u.color == WHITE$}
+						\State $c = c + 1$
+						\State $C = C \cup \{c\}$
+						\State \Call{DFS}{G, u, c, comp}
+					\EndIf
+				\EndFor
+				\State \Return $C, comp$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{DFS}{G, u, c, comp}
+				\State $u.color = GRAY$
+				\State $comp[u] = c$
+				\ForAll{$v \in G.adj[u]$}
+					\If{$v.color == WHITE$}
+						\State \Call{DFS}{G, v, c, comp}
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	So the total running time of algorithm is $O(E)$:
+	\begin{equation*}
+		\begin{split}
+		T(E) &= T(\frac{E}{2}) + O(E) \\
+		&= O(E) + O(\frac{E}{2}) + O(\frac{E}{4}) + \dots + O(\frac{E}{2^i}) + \dots + O(1) \\
+		&= O(\frac{E}{2^0}) + O(\frac{E}{2^1}) + \dots + O(\frac{E}{2^{log_2{E}}}) \\
+		&= \frac{E(\frac{1}{2})^{log_2{E} + 1} - E}{\frac{1}{2} - 1} \\
+		&= 2E - 1
+		\end{split}
+	\end{equation*}
+	For the analysis of run-time we assumed $G$ is connected so $|E| \ge |V| - 1$.
+	\chapter{Single-Source Shortest Path}
+	\phantomsection
+	\label{psec:ShortestPathClassification}	
+	\paragraph{Variants}
+	\begin{enumerate}
+	\item \textbf{Single-source shortest-path problem:}
+	\begin{enumerate}
+		\item acm-icpc World Finals 2002 question C, Crossing the Desert: You can see the problem statement in \href{http://www.spoj.com/problems/DESERT/}{"DESERT Problem in SPOJ"} and \href{https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3452}{"Problem 1011 in UVa"} online judges.\\
+		In this problem, you will compute how much food you need to purchase for a trip across the desert on foot.\\
+		At your starting location, you can purchase food at the general store and you can collect an unlimited amount of free water. The desert may contain oases at various locations. At each oasis, you can collect as much water as you like and you can store food for later use, but you cannot purchase any additional food. You can also store food for later use at the starting location. You will be given the coordinates of the starting location, all the oases, and your destination in a two-dimensional coordinate system where the unit distance is one mile. \\
+		For each mile that you walk, you must consume one unit of food and one unit of water. Assume that these supplies are consumed continuously, so if you walk for a partial mile you will consume partial units of food and water. You are not able to walk at all unless you have supplies of both food and water. You must consume the supplies while you are walking, not while you are resting at an oasis. Of course, there is a limit to the total amount of food and water that you can carry. This limit is expressed as a carrying capacity in total units. At no time can the sum of the food units and the water units that you are carrying exceed this capacity. \\
+		You must decide how much food you need to purchase at the starting location in order to make it to the destination. You need not have any food or water left when you arrive at the destination. Since the general store sells food only in whole units and has only one million food units available, the amount of food you should buy will be an integer greater than zero and less than or equal to one million. 
+		\paragraph{Input}
+		The first line of input in each trial data set contains n ($2 \le n \le 20$), which is the total number of significant locations in the desert, followed by an integer that is your total carrying capacity in units of food and water. The next n lines contain pairs of integers that represent the coordinates of the n significant locations. The first significant location is the starting point, where your food supply must be purchased; the last significant location is the destination; and the intervening significant locations (if any) are oases. You need not visit any oasis unless you find it helpful in reaching your destination, and you need not visit the oases in any particular order. \\
+		The input is terminated by a pair of zeroes.
+		\paragraph{Output}
+		For each trial, print the trial number followed by an integer that represents the number of units of food needed for your journey. Use the format shown in the example. If you cannot make it to the destination under the given conditions, print the trial number followed by the word "Impossible."\\
+		Place a blank line after the output of each test case.
+		\paragraph{Example}
+		\subparagraph{Input} \mbox{}\\
+		4 100\\
+		10 -20\\
+		-10 5\\
+		30 15\\
+		15 35\\
+		2 100\\
+		0 0\\
+		100 100\\
+		0 0
+		\subparagraph{Output} \mbox{}\\
+		Trial 1: 136 units of food\\
+		Trial 2: Impossible\\
+		\phantomsection
+		\begin{itemize}
+			\item[\textbf{Solution:}] First we make question simpler. So we suppose it is impossible to leave food on oases or starting location and possibly return and collect them.\\
+            We can model this problem to an undirected graph. The vertices are the starting location, oases and the destination. There is an edge between $u$ and $v$, if the amount of required food and water doesn't exceed $C$.
+            \begin{itemize}
+                    \item $\boldsymbol{f_{u, v}:}$ The amount of required food from $u$ to $v$
+                    \item $\boldsymbol{a_{u, v}:}$ The amount of required water from $u$ to $v$
+            \end{itemize}
+            We define weight function $w$:
+            \begin{equation*}
+                    w(u, v) = \begin{cases}
+                    f_{u, v} & f_{u, v} + a_{u, v} \le C \\
+                    \infty & f_{u, v} + a_{u, v} > C
+                    \end{cases}
+            \end{equation*}
+            Unlike food, we can pick up water in every oases. So we need to order all required food in the starting location. Because we cannot leave food anywhere in the desert, the final path should be simple. Otherwise we have at least one cycle. If we remove that cycle we obtain an equivalent path which required less food. Suppose path $p$ which connects the starting location to the target is an optimal path. We define $a_m = \max\limits_{(u, v) \in p}(a(u, v))$. We called $p$ a valid path if $\sum_{(u, v) \in p}{f(u,v)} + a_m \le C$. The required food for $p$ must be minimum among all valid paths from the starting location to the destination. We can solve this problem with a greedy algorithm similar to Dijkstra's shortest path. $u.d$ is the amount of required food from the starting location to $u$. We define a new attribute $u.a_m$ which we described it before. $s$ is the starting location and $t$ is the target location. The running time of algorithm is like Dijkstra's shortest path which can be $O(E\log V)$.
+            \begin{algorithm*}[h!]
+                    \begin{algorithmic}[1]
+                            \Function{Desert}{G, w, C, s, t}
+                                    \State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+                                    \State $S = \emptyset$
+                                    \State $Q = G.V$
+                                    \While{$Q \ne \emptyset$}
+                                            \State $u = $ \Call{EXTRACT-MIN}{G}
+                                            \State $S = S \cup \{u\}$
+                                            \ForAll{$v \in G.Adj[u]$}
+                                                    \State \Call{RELAX}{u, v, w, C}
+                                            \EndFor
+                                    \EndWhile
+                                    \If{$t.d < \infty$}
+                                            \State \Return $t.d$
+                                    \Else
+                                            \State $"IMPOSSIBLE"$
+                                    \EndIf
+                            \EndFunction
+                    \end{algorithmic}
+            \end{algorithm*}
+            \begin{algorithm*}[h!]
+                    \begin{algorithmic}[1]
+                            \Function{RELAX}{u, v, w, C}
+                                    \State $m = \max(w(u, v), u.a_m)$
+                                    \State $food = u.d + w(u, v)$
+                                    \If{$(food + m) \le C \land  food < v.d$}
+                                            \State $v.d = food$
+                                            \State $v.a_m = m$
+                                            \State $v.\pi = u$
+                                    \EndIf
+                            \EndFunction
+                    \end{algorithmic}
+            \end{algorithm*}
+            \begin{algorithm*}[h!]
+                    \begin{algorithmic}
+                            \Function{INITIALIZE-SINGLE-SOURCE}{G, s}
+                                    \ForAll{$v \in G.V$}
+                                            \State $v.d = \infty$
+                                            \State $v.\pi = NIL$
+                                            \State $v.a_m = -\infty$
+                                    \EndFor
+                                    \State $s.d = 0$
+                            \EndFunction
+                    \end{algorithmic}
+            \end{algorithm*}
+            \FloatBarrier
+		\end{itemize}
+	\end{enumerate}
+	\item \textbf{Single-destination shortest-path problem:}
+	\begin{enumerate}
+		\item You are given flight schedules between a set of $n$ cities. For each pair of cities $(i, j)$ between which there is a direct flight, you are given the pair $(d_{ij}, a_{ij})$, the departure and arrival time of the flight from city $i$ to city $j$. Assume that there is at most one flight from city $i$ to city $j$ per day. Suppose you start at city $A$ and want to reach city $B$. You have an important meeting in city $B$ that you need to attend, and you need to reach city $B$ latest by time $t$. Give an algorithm that outputs a possible sequence of flights you could take starting from city $A$ as late as possible and reaching city $B$ before time $t$, with at least one hour layover between any two consecutive flights.
+		\begin{itemize}
+			\item[\textbf{Solution:}] We don't know which flight in $A$ we should choose. We can solve the problem if we consder flights in $B$. Given the graph $G$, we need to change that to graph $G'$ such that $G'.V = G.V$ and $G'.E = \{(u, v) : (v, u) \in V.E\}$. Hence if $(i, j) \in G'.E$, there is a flight from $j$ to $i$ in which the departure time is $d_{ji}$ and arrival time is $a_{ji}$. In $B$ we only need to consider all flights $C = \{(B, u) \in G'.E : a_{uB} \le t\}$ and choose the edge with latest departure time ($\max\limits_{(B, u) \in C}(d_{uB})$). Because if we arrive at $u$, flight $(u, B)$ has the latest departure time and it doesn't make any sense to go from $u$ to $B$ through other intermediate vertices. So we add edge $(u, B)$ as an optimal answer between $u$ and $B$ (in $G'$ we should say edge $(B, u)$). This algorithm is similar to Prim's minimum spanning tree. We can call it "Single-destination latest-departure problem". We calculate the best possible sequence of flights from $u$ to $B$. Eventually we calculate an optimal path from $A$ to $B$. By "best" we mean the departure time of the first flight is as late as possible and the arrival time is at most $t$ and there is a layover of at least one hour between two consecutive flights. $u.d$ store the latest possible departure from $u$ to $B$. We add a dummy flight from $B$ to an unknown place with departure $t + 1$ to discard all those flights to $B$ with arrival time greater than $t$. $Q$ contains all those vertices which we don't know yet an optimal flight sequence from them to $B$. On the other hand, $S$ contains all those vertices which we found out an optimal flight sequence from them to $B$.
+			\begin{algorithm}[h!]
+				\begin{algorithmic}[1]			
+					\Function{SCHEDULING}{G, A, B, d, a, t}
+						\State $G' = $ \Call{REVERSE-GRAPH-EDGES}{G}
+						\State \Call{INITIALIZE-SINGLE-SOURCE}{$G'$, s}
+						\State $B.d = t + 1$ \Comment To make sure we arrive at $B$ no more than $t$
+						\State $S = \emptyset$
+						\State $Q = G'.V$
+						\While{$Q \ne \emptyset$}
+							\State $u = $ \Call{EXTRACT-MAX}{$G'$}
+							\State $S = S \cup \{u\}$
+							\ForAll{$v \in G'.Adj[u]$}
+								\State \Call{RELAX}{u, v, d, a}
+							\EndFor
+						\EndWhile
+						\If{$A.d > -\infty$}
+							\State $u = A$
+							\While{$u \ne B$}
+								\State \Call{PRINT}{$u, u.\pi$}
+								\State $u = u.\pi$
+							\EndWhile
+						\Else
+							\State \Call{PRINT}{$"IMPOSSIBLE"$}
+						\EndIf
+					\EndFunction
+				\end{algorithmic}
+			\end{algorithm}
+			\begin{algorithm}[h!]
+				\begin{algorithmic}[1]
+					\Function{RELAX}{u, v, d, a}
+						\If{$(a_{vu} + 1) \le u.d \land d_{vu} > v.d$}
+							\State $v.d = d_{vu}$
+							\State $v.\pi = u$
+						\EndIf
+					\EndFunction
+				\end{algorithmic}
+			\end{algorithm}
+			\begin{algorithm}[h!]
+				\begin{algorithmic}
+					\Function{INITIALIZE-SINGLE-SOURCE}{G, s}
+						\ForAll{$v \in G.V$}
+							\State $v.d = -\infty$
+							\State $v.\pi = NIL$
+						\EndFor
+					\EndFunction
+				\end{algorithmic}
+			\end{algorithm}
+			\FloatBarrier			
+		\end{itemize}
+	\end{enumerate}
+	\item \textbf{Single-pair shortest-path problem:}
+	\item \textbf{All-pair shortest-path problem:}
+	\end{enumerate}
+	\section{Dijkstra's algorithm}
+	\subsection{Exercises}
+	\paragraph{Exercise 6}
+	Suppose the path $p = (v_0, v_1, \dots, v_k)$ in which $v_0 = u$ and $v_k = v$ is one of the paths between $u$ and $v$. Since the probabilities are independent we want to find $\max(\prod_{i = 0}^{k - 1}r(v_i, v_{i+1}))$. We can reduce the problem to a shortest-path one by changing the weight function $w(u, v) = r(u, v)$ to $w'(u, v) = -\log{r(u, v)}$.
+	\begin{equation*}
+	\begin{split}
+		0 &\le r(u, v) \le 1 \\
+		\log 0 &\le \log{r(u, v)} \le \log 1
+	\end{split}
+	\end{equation*}
+	If we define $\log 0 = -\infty$, then $-\infty \le \log{r(u, v)} \le 0$ which is equivalent to $0 \le -\log{r(u, v)} \le \infty$.
+	\begin{equation*}
+	\begin{split}
+		\max(\prod_{i = 0}^{k - 1}r(v_i, v_{i+1})) \\
+		&\equiv \max(\sum_{i = 0}^{k - 1}\log{r(v_i, v_{i+1})}) \\
+		&\equiv \min(\sum_{i = 0}^{k - 1}-\log{r(v_i, v_{i+1})})
+	\end{split}
+	\end{equation*}
+	which is exactly the shortest path problem. Since $w'(u, v)$ is non-negative, we can use Dijkstra algorithm which its run-time can be $O(E\log V)$. We only need to change $RELAX$ function.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{$w'$}{u, v, w}
+				\If{$w(u, v) == 0$}
+					\State \Return $\infty$
+				\Else
+					\State \Return $-\log{w(u, v)}$
+				\EndIf
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\begin{algorithm*}
+		\begin{algorithmic}[1]
+			\Function{RELAX}{u, v, w}
+				\If{$v.d > u.d + w'(u, v, w)$}
+					\State $v.d = u.d + w'(u, v, w)$
+					\State $v.\pi = u$
+				\EndIf
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}	
+	\FloatBarrier	
 \end{document}
