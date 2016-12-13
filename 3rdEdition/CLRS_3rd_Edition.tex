@@ -1035,6 +1035,25 @@
 	\begin{enumerate}
 	\item \textbf{Single-source shortest-path problem:}
 	\begin{enumerate}
+		\item Consider two arbitrary vertices $u$ and $v$. Suppose there is path $p$ between $u$ and $v$. We define $m = \min\limits_{(u, v) \in p}(w(u, v))$ and $M = \max\limits_{(u, v) \in p}(w(u, v))$.
+		\begin{enumerate}
+			\item Find a path between $u$ and $v$ which has the maximum $m$ among all possible paths
+			\begin{itemize}
+				\item \textbf{Solution} We can use an algorithm similar to Dijkstra's shortest path for solving this problem
+			\end{itemize}
+			\item Find a path between $u$ and $v$ which has the minimum $M$ among all possible paths
+			\begin{itemize}
+				\item \textbf{Solution} We can use an algorithm similar to Dijkstra's shortest path for solving this problem
+			\end{itemize}			
+			\item Find a path between $u$ and $v$ which has the maximum $M$ among all possible paths
+			\begin{itemize}
+				\item \textbf{Solution} We can't use an algorithm similar to Dijkstra's shortest path. Instead we use an algorithm similar to Bellman-Ford shortest path. It is possible the path has at least one cycle.
+			\end{itemize}
+			\item Find a path between $u$ and $v$ which has the minimum $m$ among all possible paths
+			\begin{itemize}
+				\item \textbf{Solution} We can't use an algorithm similar to Dijkstra's shortest path. Instead we use an algorithm similar to Bellman-Ford shortest path. It is possible the path has at least one cycle.
+			\end{itemize}
+		\end{enumerate}		
 		\item acm-icpc World Finals 2002 question C, Crossing the Desert: You can see the problem statement in \href{http://www.spoj.com/problems/DESERT/}{"DESERT Problem in SPOJ"} and \href{https://uva.onlinejudge.org/index.php?option=com_onlinejudge&Itemid=8&page=show_problem&problem=3452}{"Problem 1011 in UVa"} online judges.\\
 		In this problem, you will compute how much food you need to purchase for a trip across the desert on foot.\\
 		At your starting location, you can purchase food at the general store and you can collect an unlimited amount of free water. The desert may contain oases at various locations. At each oasis, you can collect as much water as you like and you can store food for later use, but you cannot purchase any additional food. You can also store food for later use at the starting location. You will be given the coordinates of the starting location, all the oases, and your destination in a two-dimensional coordinate system where the unit distance is one mile. \\
@@ -1181,6 +1200,7 @@
 		\end{itemize}
 	\end{enumerate}
 	\item \textbf{Single-pair shortest-path problem:}
+	Many problems for previous sections actually belong here.
 	\item \textbf{All-pair shortest-path problem:}
 	\end{enumerate}
 	\section{Dijkstra's algorithm}
