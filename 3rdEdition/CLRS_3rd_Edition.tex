@@ -1243,5 +1243,19 @@
 			\EndFunction
 		\end{algorithmic}
 	\end{algorithm*}	
-	\FloatBarrier	
+	\FloatBarrier
+	\chapter{Maximum Flow}
+	\chapter{Flow networks}
+	\chapter{The Ford-Fulkerson method}
+	\subsection{Exercises}
+	\paragraph{Exercise 13}
+	Suppose $S$ is a cut of $V$ which $s \in S$ and $t \in V - S$. We call $T = V - S$. We define the capacity of that cut $c(S, T) = \sum_{u \in S}\sum_{v \in T}c(u, v)$. If we increase the capacity of each edge in $E$ by 1, we have $c(S, T) = \sum_{u \in S}\sum_{v \in T}{c(u, v) + 1} = \sum_{u \in S}\sum_{v \in T}{c(u, v)} + k$ which $k$ is the number of edges that cross the cut. But it's not enough. It is possible we have a cut which its capacity is not minimum but it has fewer edges than min cut. So by increasing the capacities, it'll become the new min cut. We know that $k \le E$. Hence we can define $T = E + 1$ and change the capacities as following:
+	\begin{equation*}
+		\begin{split}
+		c(S, T) &= \sum_{u \in S}\sum_{v \in T}{T \times c(u, v) + 1} \\
+		&= T \sum_{u \in S}\sum_{v \in T}{c(u, v)} + k \\
+		&= Tq + k
+		\end{split}
+	\end{equation*}
+	So even if min cut has $E$ edges, increasing its edges by $1$ is less than the other cuts which are not minimum. For more information you can see \href{https://www.topcoder.com/community/data-science/data-science-tutorials/maximum-flow-section-2/}{TopCoder's Maximum Flow: Section 2}.
 \end{document}
