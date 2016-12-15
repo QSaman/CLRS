@@ -7,6 +7,7 @@
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{placeins}
+\usepackage{amssymb}
 
 \usepackage{tikz}
 \usetikzlibrary{arrows}
@@ -1246,8 +1247,169 @@
 	\FloatBarrier
 	\chapter{Maximum Flow}
 	\chapter{Flow networks}
-	\chapter{The Ford-Fulkerson method}
+	\section{The Ford-Fulkerson method}
+	\paragraph{Dealing with antiparallel edges}
+	\subparagraph{Forbidding antiparallel edges}
+	This is the approach of the textbook. Suppose flow network $G = (V, E)$. If $(u, v) \in E$, then $(v, u) \not\in E$. With this definition we always have $0 \le f(u, v) \le c(u, v)$ in which $f(u, v)$ is the flow between $(u, v)$ and $c(u, v)$ is its capacity. Based on this definition of flow network we have the following "residual capacities".
+	\begin{equation}
+	\label{eq:ResidualCapacityNoAntiParallel}
+	c_f(u, v) = \begin{cases}
+	c(u, v) - f(u, v) & (u, v) \in E \\
+	f(v, u) & (v, u) \in E \\
+	0 & \text{otherwise}
+	\end{cases}
+	\end{equation}
+	Since antiparallel edges are not allowed, it is impossible that we have $(u, v) \in E \land (v, u) \in E$. So the definition of residual capacities is well defined. Given a flow network $G = (V, E)$ and a flow $f$, the \textbf{residula network} of $G$ induced by $f$ is $G_f = (V, E_f)$, where $E_f = \{(u, v) \in V \times V : c_f(u, v) > 0\}$.\\
+	Now we need to deal with the flow of edges. If $f$ is a flow in $G$ and $f'$ is a flow in the corresponding residual network $G_f$, we define $f \uparrow f'$, the \textbf{augmentation} of flow $f$ by $f'$, to be a function from $V \times V$ to $\mathbb{R}$, defined by
+	\begin{equation}
+	\label{eq:augmentationOfFlowNoAntiparallel}
+		(f \uparrow f')(u, v) = \begin{cases}
+		f(u, v) + f'(u, v) - f'(v, u) & (u, v) \in E \\
+		0 & \text{otherwise}
+		\end{cases}
+	\end{equation}
+	If $f$ is a flow in $G$, the \textbf{value} of $f$ is defined as $|f| = \sum_{v \in V}f(s, v) - \sum_{v \in V}f(v, s)$ in which $s$ is the source. In the textbook it was proven that $|f \uparrow f'| = |f| + |f'|$.\\
+	Consider augmenting path $p$ from source to sink. We define \textbf{residual capacity} of $p$ as $c_f(p) = \min\{c_f(u, v) : (u, v) \text{ is on } p\}$. In the textbook it was proven that the following function $f_p : V \times V \rightarrow \mathbb{R}$ is a flow in $G_f$ with value $|f_p| = c_f(p) > 0$.
+	\begin{equation*}
+	f_p(u, v) = \begin{cases}
+	c_f(p) & \text{if } (u, v) \text{ is on } p \\
+	0 & \text{otherwise}
+	\end{cases}
+	\end{equation*}
+	So we can use $|f \uparrow f_p| = |f| + |f_p| > |f|$ to increase the flow until we reach maximum flow.
+	\subparagraph{Allowing antiparallel edges}
+	Suppose in flow network $G = (V, E)$ it is possible $(u, v) \in E \land (v, u) \in E$. We need to redefine some definitions. Consider Ford-Fulkerson algorithm. In each step we increase flow $f$ until we reach maximum flow. Suppose the flow of $G$ is $f_i$ in i\textsuperscript{th} step. So we have $f_1, f_2, \dots, f_m$. It is obvious $|f_1| = 0$ and $|f_m|$ is the value of maximum flow. Suppose we are in the i\textsuperscript{th} step and $p$ is an augmenting path from source to sink. The \textbf{residual capacity} in the i\textsuperscript{th} step is given by
+	\begin{equation}
+	\label{eq:ResidualCapacityWithAntiParallel}
+		c_{f_i}(u, v) = \begin{cases}
+		c_{f_{i - 1}}(u, v) - c_{f_i}(p) & (u, v) \text{ is on } p \\
+		c_{f_{i - 1}}(u, v) + c_{f_i}(p) & (v, u) \text{ is on } p \\
+		c_{f_{i - 1}}(u, v) & \text{otherwise}
+		\end{cases}
+	\end{equation}
+	For the base case we have $c_{f_1} = C$ in which $C$ is the capacities for all edges. Note that equation \ref{eq:ResidualCapacityWithAntiParallel} not only is the general definition of equation \ref{eq:ResidualCapacityNoAntiParallel}, but also easier to implement. Unlike equation \ref{eq:ResidualCapacityNoAntiParallel} which required the amount of edge flow, equation \ref{eq:ResidualCapacityWithAntiParallel} only relies on previous residual capacities.\\
+	Now we need to redefine equation \ref{eq:augmentationOfFlowNoAntiparallel}. Suppose $p$ is an augmenting path in the i\textsuperscript{th} step.
+	\begin{equation}
+		f_i(u, v) = (f_{i - 1} \uparrow f_p)(u, v) = c(u, v) - c_{f_i}(u, v)
+	\end{equation}
+	By this definition it is possible we have negative flow. If $f(u, v) < 0$, it means the actual flow is from $v$ to $u$. In other words, $f(v, u) > 0$. More precisely, if $f(u, v) = k$ which $k > 0$, then $f(v, u) = -k$. We can prove it through mathematical induction. At the start $|f| = 0$ which holds our assumption and we use it as our base case. Suppose in the $(i - 1)$\textsuperscript{th} step, $f(u, v) = k_{i - 1}$ and $f(v, u) = -k_{i - 1}$. We need to prove this condition holds in the step $i$. Without loss of generality suppose $(u, v)$ is on augmenting path $p$:
+	\begin{equation*}
+		\begin{split}
+		f_i(u, v) &= c(u, v) - c_{f_i}(u, v) \\
+		&= c(u, v) - [c_{f_{i - 1}}(u, v) - c_{f_i}(p)] \\
+		&= k
+		\end{split}	
+	\end{equation*}
+	\begin{equation*}
+		\begin{split}
+		f_i(v, u) &= c(v, u) - c_{f_i}(v, u) \\
+		&= c(v, u) - [c_{f_{i - 1}}(v, u) + c_{f_i}(p)] \\
+		&= -k
+		\end{split}
+	\end{equation*}
+	It means:
+	\begin{equation*}
+		\begin{split}
+		c(u, v) - c_{f_{i - 1}}(u, v) + c_{f_i}(p) &= -c(v, u) + c_{f_{i - 1}}(v, u) + c_{f_i}(p)\\
+		\Rightarrow c(u, v) - c_{f_{i - 1}}(u, v) &= -c(v, u) + c_{f_{i - 1}}(v, u) \\
+		\Rightarrow f_{i - 1}(u, v) &= -f_{i - 1}(v, u)
+		\end{split}
+	\end{equation*}
+	So with this definition we have
+	\begin{equation}
+		f_i(u, v) = -f_i(v, u)
+	\end{equation}
+	\paragraph{Minimum cut properties}
+	Suppose we have a flow network with maximum flow. Consider the final residual network $G_f$. Obviously we shouldn't have any augmenting path from $s$ to $t$.
+	\begin{itemize}
+		\item[] \textbf{augmenting reachable vertex u:} If there is an augmenting path from $s$ to $u$ in the final residual network $G_f$, we call $u$ augmenting reachable from $s$. Obviously $t$ is not augmenting reachable in the final residual network. So we call it augmenting unreachable
+	\end{itemize}
+	Consider $cut(S, T)$ in which $S$ is the set of all augmenting reachable vertices from $s$ and $T = V - S$ has all augmenting unreachable vertices from $s$. Obviously $t \in T$. Otherwise we have an augmenting path from $s$ to $t$. We have $\forall (u, v) \in \{(x, y) \in E : x \in S \land y \in T \}$:
+	\begin{equation*}
+	\begin{split}
+	flow(u, v) &= c(u, v) \\
+	c_f(u, v) &= 0 \\
+	\end{split}		
+	\end{equation*}
+	and $\forall (a, b) \in \{(x, y) \in E : a \in T \land b \in S \}$ we have:
+	\begin{equation*}
+	\begin{split}
+	flow(a, b) &= 0 \\
+	c_f(a, b) &= c(a, b) \\
+	\end{split}		
+	\end{equation*}	
+	$c_f(u, v)$ is residual capacity of each edge which is defined as:
+	\begin{equation*}
+		c_f(u, v) = \begin{cases}
+		c(u, v) - f(u, v) & (u, v) \in E \\
+		f(v, u) & (v, u) \in E \\
+		0 & \text{otherwise}
+		\end{cases}
+	\end{equation*}
+	Note that if $flow(a, b) > 0$, then $c_f(b, a) = flow(a, b)$ which means $a$ is augmenting reachable from $s$ which is a contradiction. Since $flow(u, v) = c(u, v)$, this is a \textbf{"minimum cut"}. This property holds weather or not anti-parallel edges are allowed. Suppose $(u, v) \in E$ and $(v, u) \in E$ and $u \in S$ and $v \in T$. Then we have:
+	\begin{equation*}
+		\begin{split}
+		flow(u, v) &= c(u, v) \\
+		flow(v, u) &= 0 \\
+		c_f(u, v) &= 0 \\
+		c_f(v, u) &= c(v, u)
+		\end{split}
+	\end{equation*}
+	Note that if $c_f(u, v) > 0$ then $v$ is augmenting reachable from $s$ which is a contradiction. Hence $c_f(u, v) = 0$ which means $flow(u, v) = c(u, v)$ and $flow(v, u) = 0$. For more information you can see \href{https://www.topcoder.com/community/data-science/data-science-tutorials/maximum-flow-section-1/}{"TopCoder's Maximum Flow: Section 1"} and \href{https://www.topcoder.com/community/data-science/data-science-tutorials/maximum-flow-section-2/}{"TopCoder's Maximum Flow: Section 2"}.
+	\begin{enumerate}
+		\item Given a weighted directed graph $G$, remove a minimum-set of edges in such a way that a given node is unreachable from another given node.
+		\begin{itemize}
+			\item We convert graph $G$ to a flow network. We use the weight of edges as their capacities. So $c(u, v) = w(u, v)$. Run max flow algorithm on the flow network until we don't have any augmenting path from $s$ to $t$. Put all augmenting reachable vertices from $s$ into set $S$ and the others in $T$ to get a min cut. All edges $(u, v) \in E$ that are from $S$ to $T$ have flow $f(u, v) = c(u, v)$ and all edges $(x, y) \in E$ that are from $T$ to $S$ have flow $f(x, y) = 0$. In other words the capacity of min cut is $\sum_{u \in S}\sum_{v \in T}w(u, v)$. So by removing the crossing edges of min cut we solve the problem optimally.
+		\end{itemize}
+		\item Exercise 11 in \ref{sec:MaxFlowEdgeConnectivity}
+	\end{enumerate}
 	\subsection{Exercises}
+	\paragraph{Exercise 11}
+	\phantomsection
+	\label{sec:MaxFlowEdgeConnectivity}
+	\subparagraph{Wrong greedy appraoch} Remove all edges that are incident to a vertex with minimum degree. We need to prove this greedy choice lead to a optimal solution in general. Suppose $u$ has the minimum degree $k$. We have an optimal solution $s$ in which at least one of the edges $(u, v)$ for $v \in V - \{u\}$ is not removed. We need to prove we can convert $s$ to $s'$ which all incident edges to $u$ is removed and is optimal as $s$. Without loss of generality suppose $k = 2$ and $w$ is the isolated vertex in $s$.
+	\begin{figure*}[h!]
+		\centering
+		\begin{tikzpicture}
+		\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+		\tikzset{snake it/.style={
+				decoration={snake, 
+					amplitude = 1mm,
+					segment length = 8mm,
+					post length=0.9mm},decorate}}
+		%vertices
+		\node[vertex] (u) at (0, 0) {$u$};
+		\node[vertex] (v1) at (1, 1) {$v_1$};
+		\node[vertex] (v2) at (1, -1) {$v_2$};
+		\node[vertex] (v3) at (4, 0) {$v_3$};
+		\node[vertex] (w) at (6, 0) {$w$};
+		\node[vertex] (v4) at (7, 1) {$v_4$};
+		\node[vertex] (v5) at (7, -1) {$v_5$};
+		%edges
+		\draw (u) -- (v1);
+		\draw (u) -- (v2);		
+		\draw (v3) -- (w);
+		\draw (w) -- (v4);
+		\draw (w) -- (v5);
+		\draw (v4) -- (v5);			
+		\path (v1) edge[snake it] (v3);
+		\path (v2) edge[snake it] (v3);
+		\end{tikzpicture}
+	\end{figure*}
+	As you can see neither $w$ nor $v_3$ have minimum degree and with removing only one edge we can make the graph disconnected.
+	\FloatBarrier
+	\subparagraph{Correct max flow min cut approach} We choose an arbitrary vertex $s$ as source and each $t \in V - \{s\}$ as sink. We create a new directed graph $G' = (V, E')$. $\forall (u, v) \in E$ $(u, v) \in E' \land (v, u) \in E'$. It is obvious $|E'| = 2|E|$. Then we can make a flow network form $G'$. Note that we violate the assumption if $(u, v) \in E'$, then $(v, u) \not\in E'$ for flow networks. But the algorithm still works and it's not a big deal. Also $s$ can have incoming edges and $t$ can have outgoing edges which is not violating any assumptions. We assign capacity $1$ to each edge.\\
+	So we have $|V| - 1$ flow networks each of them has $s$ as its source and $t \in V - \{s\}$ as its sink. We need to find max flow in each of them and choose the minimum of them as the result. Suppose $S$ and $T = V - S$ is a min cut and $E_c = \{(u, v) \in E' : u \in S, v \in T\}$. Since each edge has capacity $1$, $\forall (u, v) \in E_c$, $flow(u, v) = 1 \land flow(v, u) = 0$, max flow is the number of edges in the min cut of that flow network. So by removing those edges in $G$ we solve the problem optimally. \\
+	Generally for min cut $S$ and $T = V - S$ and $\forall (u, v) \in \{(x, y) \in E : x \in V \land y \in T \}$ we have:
+	\begin{equation*}
+		\begin{split}
+		flow(u, v) &= c(u, v) \\
+		flow(v, u) &= 0 \\
+		c_f(u, v) &= 0 \\
+		c_f(v, u) &= c(u, v)
+		\end{split}		
+	\end{equation*}
+	$c_f(u, v)$ is the capacity of each edge in residual network. For more information you can see \href{https://www.topcoder.com/community/data-science/data-science-tutorials/maximum-flow-section-1/}{"TopCoder's Maximum Flow: Section 1"} and \href{https://www.topcoder.com/community/data-science/data-science-tutorials/maximum-flow-section-2/}{"TopCoder's Maximum Flow: Section 2"}.
 	\paragraph{Exercise 13}
 	Suppose $S$ is a cut of $V$ which $s \in S$ and $t \in V - S$. We call $T = V - S$. We define the capacity of that cut $c(S, T) = \sum_{u \in S}\sum_{v \in T}c(u, v)$. If we increase the capacity of each edge in $E$ by 1, we have $c(S, T) = \sum_{u \in S}\sum_{v \in T}{c(u, v) + 1} = \sum_{u \in S}\sum_{v \in T}{c(u, v)} + k$ which $k$ is the number of edges that cross the cut. But it's not enough. It is possible we have a cut which its capacity is not minimum but it has fewer edges than min cut. So by increasing the capacities, it'll become the new min cut. We know that $k \le E$. Hence we can define $T = E + 1$ and change the capacities as following:
 	\begin{equation*}
