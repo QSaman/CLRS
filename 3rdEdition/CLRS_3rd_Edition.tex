@@ -171,8 +171,8 @@
 		&000 \\
 		&111
 	\end{align*}
-	\section{Accountant method}
-	For another example of "accountant method" see exercise 5 of \ref{sec:Representation of graphs}.
+	\section{The accounting method}
+	For another example of "the accounting method" see exercise 5 of \ref{sec:Representation of graphs}.
 	\chapter{Elementary Graph Algorithms}
 	\section{Representation of graphs}
 	\label{sec:Representation of graphs}
@@ -903,7 +903,7 @@
 	Consider an arbitrary MST $T$. Suppose the maximum-weight edge in $T$ is $e$. If we remove that edge we have a forest of two trees $C_1$ and $C_2$. Now consider MST $T'$ whose maximum-weight edge, $e'$, is less that $e$. There should be an edge in $T'$ that connects $C_1$ to $C_2$. The weight of that edge should be less than $e$. In other words, $e$ is not a light edge which contradicts $T$ is an MST.
 	\subparagraph{b.}
 	We remove all edges in $G.E$ which their weight are higher than $b$. We called the modified graph $G_b$. It is obvious that $G_b.V = G.V$ and $G_b.E = \{(u, v) \in G.E : w(u, v) \le b\}$. If $G_b$ remains connected then every spanning tree of $G_b$ doesn't have an edge whose weight is greater than b. The running time of this algorithm is $O(V + E)$. Since G should be a connected graph, $|E| \ge |V| - 1$. So we can say the running time is $O(E)$.
-	\begin{algorithm*}[h1]
+	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
 			\Function{VALID-BST-VALUE}{G, b}
 				\State $G' = $ \Call{REMOVE-EDGES}{G, b}
@@ -919,7 +919,7 @@
 			\EndFunction
 		\end{algorithmic}
 	\end{algorithm*}
-	\begin{algorithm*}[h1]
+	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
 			\Function{REMOVE-EDGES}{G, b}
 				\State $G_b.V = G.V$
@@ -1036,6 +1036,48 @@
 	\begin{enumerate}
 	\item \textbf{Single-source shortest-path problem:}
 	\begin{enumerate}
+		\item Given unweighted undirected graph $G$ and vertices $s$ and $t$. Find the number of shortest path between $s$ and $t$.
+		\begin{itemize}
+			\item[\textbf{Solution}] It's similar to all-pair shortest path problem but we solve it through Single-source shortest-path problem. Since the graph is unweighted we use BFS. We define a new attirbute $u.num$ which is the number of shortest path from $s$ to $u$. Because the graph is unweighted we only deal with tree and back edges. It is possible a tree edge be another shortest path which we need to consider it.
+			\begin{algorithm*}[h!]
+				\begin{algorithmic}[1]
+					\Function{FIND-SHORTEST-PATH-COUNT}{G, s, t}
+						\State \Call{INIT-BFS}{G}
+						\State $s.d = 0$
+						\State $s.num = 1$
+						\State $s.color = GREY$
+						\State $Q = \emptyset$						
+						\State \Call{ENQUEUE}{Q, s}
+						\While{$Q \ne \emptyset$}
+							\State $u = $ \Call{DEQUEUE}{Q}
+							\ForAll{$v \in G.adj[u]$}
+								\If{$u.color == WHITE$} \Comment $(u, v)$ is a tree edge
+									\State $v.color = GREY$
+									\State $v.d = u.d + 1$
+									\State $v.num = u.num$
+									\State \Call{ENQUEUE}{G, v}
+								\ElsIf{$u.d + 1 == v.d$} \Comment $(u, v)$ is a back edge
+									\State $v.num = v.num + u.num$
+								\EndIf
+							\EndFor
+						\EndWhile
+						\State \Return $t.num$
+					\EndFunction
+				\end{algorithmic}
+			\end{algorithm*}
+			\begin{algorithm*}[h!]
+				\begin{algorithmic}
+					\Function{INIT-BFS}{G}
+						\ForAll{$u \in G.V$}
+							\State $u.d = \infty$
+							\State $u.color = WHITE$
+							\State $u.num = 0$
+						\EndFor
+					\EndFunction
+				\end{algorithmic}
+			\end{algorithm*}
+			\FloatBarrier
+		\end{itemize}
 		\item Consider two arbitrary vertices $u$ and $v$. Suppose there is path $p$ between $u$ and $v$. We define $m = \min\limits_{(u, v) \in p}(w(u, v))$ and $M = \max\limits_{(u, v) \in p}(w(u, v))$.
 		\begin{enumerate}
 			\item Find a path between $u$ and $v$ which has the maximum $m$ among all possible paths
