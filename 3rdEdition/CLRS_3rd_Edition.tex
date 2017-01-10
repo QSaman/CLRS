@@ -1246,6 +1246,124 @@
 	Many problems for previous sections actually belong here.
 	\item \textbf{All-pair shortest-path problem:}
 	\end{enumerate}
+	\section{The Bellman-Ford algorithm}
+	\subsection{Exercises}
+	\paragraph{Exercise 3}
+	Since finding all shortest-paths require at most $m$ steps, it is obvious in $(m + 1)$\textsuperscript{th} iteration no $u.d$ will be updated for all $u \in V$.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BELLMAN-FORD2}{G, w, s}
+				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
+					\State $updated = FALSE$
+					\ForAll{edge $(u, v) \in G.E$}
+						\If{\Call{RELAX}{u, v, w} $ == TRUE$}
+							\State $updated = TRUE$
+						\EndIf
+					\EndFor
+					\If{updated $ == FALSE$}
+						\State break
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}
+			\Function{RELAX}{u, v, w}
+				\If{$v.d > u.d + w(u, v)$}
+					\State $v.d = u.d + w(u, v)$
+					\State $v.\pi = u$
+					\State \Return $TRUE$
+				\Else
+					\State \Return $FALSE$
+				\EndIf
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	\paragraph{Exercise 4}
+	When we detect a negative cycle, we need to update $u.d = -\infty$. Then we need to update $d$ attribute for all reachable vertices from $u$ to $-\infty$.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
+				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
+					\ForAll{edge $(u, v) \in G.E$}
+						\State \Call{RELAX}{u, v, w}
+					\EndFor
+				\EndFor
+				\State \Call{INITIALIZE-DFS}{G}
+				\For{each edge $(u, v) \in G.E$}
+					\If{$v.d > u.d + w(u, v)$}
+						\State $v.d = -\infty$
+						\State \Call{DFS}{G, v}
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{DFS}{G, u}
+				\State $u.color = GREY$
+				\ForAll{$v \in G.adj[u]$}
+					\If{$v.color == WHITE$}
+						\State $v.d = -\infty$
+						\State $v.color = GREY$
+						\State \Call{DFS}{G, v}
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	\paragraph{Exercise 5}
+	In the Bellman-Ford algorithm $s.d = 0$ and other vertices have value $\infty$ for their $d$ attribute. If we set $u.d = 0$ for all $u \in V$ we solved this problem. Note that $\delta^*(v) = v.d$.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
+				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+				\ForAll{$u \in G.V$}
+					\State $u.d = 0$
+				\EndFor
+				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
+					\ForAll{edge $(u, v) \in G.E$}
+						\State \Call{RELAX}{u, v, w}
+					\EndFor
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}	
+	\FloatBarrier
+	\paragraph{Exercise 6}
+	We add a new attribute $u.mark$ for avoiding printing vertices in a negative cycle more than once. Suppose $v_0, v_1, \dots, v_k$ are vertices in a negative cycle and $v_0 = v_k$. The Bellman-Ford algorithm expands shortest-path tree in each step. Suppose $v_i.\pi = v_{i - 1}$ for $1 \le i \le k - 1$ and $v_0.\pi = v_k.\pi = u$. Since the cycle is negative, $v_{k - 1}.d + w(k - 1, k) < v_k.d$. So we change the value of $v_k.\pi$ from $u$ to $v_{k - 1}$. In other words, $v_i$ for $0 \le i \le k$ are unreachable from $u$ in shortest-path tree.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
+				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
+					\ForAll{edge $(u, v) \in G.E$}
+						\State \Call{RELAX}{u, v, w}
+					\EndFor
+				\EndFor
+				\ForAll{$u \in G.V$}
+					\State $u.mark = FALSE$
+				\EndFor
+				\For{each edge $(u, v) \in G.E$}
+					\If{$v.d > u.d + w(u, v)$}
+						\State $w = v$
+						\While{$w.mark == FALSE$}
+							\State $w.mark = TRUE$
+							\State \Call{PRINT}{w}
+							\State $w = w.\pi$
+						\EndWhile
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier	
 	\section{Dijkstra's algorithm}
 	\subsection{Exercises}
 	\paragraph{Exercise 6}
