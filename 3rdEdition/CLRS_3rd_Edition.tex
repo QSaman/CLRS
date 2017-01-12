@@ -1405,6 +1405,45 @@
 		\end{algorithmic}
 	\end{algorithm*}	
 	\FloatBarrier
+	\chapter{All-Pairs Shortest Path}
+	\section{The Floyd-Warshall algorithm}
+	\paragraph{Transitive closure of a directed graph}
+	\begin{enumerate}
+		\item Given a directed graph G. Design an algorithm to determine whether or not there is at least one cycle. See TopCoder SRM 705 DIV 2 question 500.
+		\begin{itemize}
+			\item[\textbf{Solution}] We can use DFS and if we find a back edge then it's part of a cycle. We can use transitive closure to solve this problem. We assume we don't have loop edges.
+			\begin{algorithm*}[h!]
+				\begin{algorithmic}
+					\Function{CYCLE}{G}
+						\State $n = |G.V|$
+						\State let $T = (t_{ij})$ be a new $n \times n$ matrix
+						\For{$i = 1$ to $n$}
+							\For{$j = 1$ to $n$}
+								\If{$i \ne j \land (i, j) \in G.E$}
+									\State $t_{ij} = 1$
+								\Else
+									\State $t_{ij} = 0$								
+								\EndIf
+							\EndFor
+						\EndFor
+						\For{$k = 1$ to $n$}
+							\For{$i = 1$ to $n$}
+								\For{$j = 1$ to $n$}
+									\State $t_{ij} = t_{ij} \lor (t_{ik} \land t_{kj})$
+								\EndFor
+							\EndFor
+						\EndFor
+						\For{$i = 1$ to $n$}
+							\If{$t_{ii} == TRUE$}
+								\State \Return $TRUE$
+							\EndIf
+						\EndFor
+						\State \Return $FALSE$
+					\EndFunction
+				\end{algorithmic}
+			\end{algorithm*}
+		\end{itemize}
+	\end{enumerate}
 	\chapter{Maximum Flow}
 	\chapter{Flow networks}
 	\section{The Ford-Fulkerson method}
