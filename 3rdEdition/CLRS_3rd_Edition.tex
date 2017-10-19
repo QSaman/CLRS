@@ -1191,7 +1191,13 @@
 	\begin{enumerate}
 		\item You are given flight schedules between a set of $n$ cities. For each pair of cities $(i, j)$ between which there is a direct flight, you are given the pair $(d_{ij}, a_{ij})$, the departure and arrival time of the flight from city $i$ to city $j$. Assume that there is at most one flight from city $i$ to city $j$ per day. Suppose you start at city $A$ and want to reach city $B$. You have an important meeting in city $B$ that you need to attend, and you need to reach city $B$ latest by time $t$. Give an algorithm that outputs a possible sequence of flights you could take starting from city $A$ as late as possible and reaching city $B$ before time $t$, with at least one hour layover between any two consecutive flights.
 		\begin{itemize}
-			\item[\textbf{Solution:}] We don't know which flight in $A$ we should choose. We can solve the problem if we consder flights in $B$. Given the graph $G$, we need to change that to graph $G'$ such that $G'.V = G.V$ and $G'.E = \{(u, v) : (v, u) \in V.E\}$. Hence if $(i, j) \in G'.E$, there is a flight from $j$ to $i$ in which the departure time is $d_{ji}$ and arrival time is $a_{ji}$. In $B$ we only need to consider all flights $C = \{(B, u) \in G'.E : a_{uB} \le t\}$ and choose the edge with latest departure time ($\max\limits_{(B, u) \in C}(d_{uB})$). Because if we arrive at $u$, flight $(u, B)$ has the latest departure time and it doesn't make any sense to go from $u$ to $B$ through other intermediate vertices. So we add edge $(u, B)$ as an optimal answer between $u$ and $B$ (in $G'$ we should say edge $(B, u)$). This algorithm is similar to Prim's minimum spanning tree. We can call it "Single-destination latest-departure problem". We calculate the best possible sequence of flights from $u$ to $B$. Eventually we calculate an optimal path from $A$ to $B$. By "best" we mean the departure time of the first flight is as late as possible and the arrival time is at most $t$ and there is a layover of at least one hour between two consecutive flights. $u.d$ store the latest possible departure from $u$ to $B$. We add a dummy flight from $B$ to an unknown place with departure $t + 1$ to discard all those flights to $B$ with arrival time greater than $t$. $Q$ contains all those vertices which we don't know yet an optimal flight sequence from them to $B$. On the other hand, $S$ contains all those vertices which we found out an optimal flight sequence from them to $B$.
+			\item[\textbf{Solution:}] We don't know which flight in $A$ we should choose. We can solve the problem if we consder flights in $B$. Given the graph $G$, we need to change that to graph $G'$ such that $G'.V = G.V$ and $G'.E = \{(u, v) : (v, u) \in V.E\}$. Hence if $(i, j) \in G'.E$, there is a flight from $j$ to $i$ in which the departure time is $d_{ji}$ and arrival time is $a_{ji}$. In $B$ we only need to consider all flights $C = \{(B, u) \in G'.E : a_{uB} \le t\}$ and choose the edge with latest departure time ($\max\limits_{(B, u) \in C}(d_{uB})$). Because if we arrive at $u$, flight $(u, B)$ has the latest departure time and it doesn't make any sense to go from $u$ to $B$ through other intermediate vertices (this description is not entirely correct see figure \ref{fig:latest_departure} for more information). So we add edge $(u, B)$ as an optimal answer between $u$ and $B$ (in $G'$ we should say edge $(B, u)$). This algorithm is similar to Prim's minimum spanning tree. We can call it "Single-destination latest-departure problem". We calculate the best possible sequence of flights from $u$ to $B$. Eventually we calculate an optimal path from $A$ to $B$. By "best" we mean the departure time of the first flight is as late as possible and the arrival time is at most $t$ and there is a layover of at least one hour between two consecutive flights. $u.d$ store the latest possible departure from $u$ to $B$. We add a dummy flight from $B$ to an unknown place with departure $t + 1$ to discard all those flights to $B$ with arrival time greater than $t$. $Q$ contains all those vertices which we don't know yet an optimal flight sequence from them to $B$. On the other hand, $S$ contains all those vertices which we found out an optimal flight sequence from them to $B$.
+			\begin{figure}
+			\centering
+			\caption{Algorithm correctness}
+			\label{fig:latest_departure}
+			\includegraphics[width=\linewidth]{images/latest-departure.jpg}
+			\end{figure}
 			\begin{algorithm}[h!]
 				\begin{algorithmic}[1]			
 					\Function{SCHEDULING}{G, A, B, d, a, t}
@@ -1365,6 +1371,13 @@
 	\end{algorithm*}
 	\FloatBarrier	
 	\section{Dijkstra's algorithm}
+	For an intuition of Dijkstra shortest path, see figure \ref{fig:dijkstra-shortest-path-algorithm}.
+	\begin{figure}
+	\centering
+	\caption{Dijkstra Shortest Path Algorithm}
+	\label{fig:dijkstra-shortest-path-algorithm}
+	\includegraphics[width=\linewidth]{images/dijkstra-shortest-path.jpg}
+	\end{figure}
 	\subsection{Exercises}
 	\paragraph{Exercise 6}
 	Suppose the path $p = (v_0, v_1, \dots, v_k)$ in which $v_0 = u$ and $v_k = v$ is one of the paths between $u$ and $v$. Since the probabilities are independent we want to find $\max(\prod_{i = 0}^{k - 1}r(v_i, v_{i+1}))$. We can reduce the problem to a shortest-path one by changing the weight function $w(u, v) = r(u, v)$ to $w'(u, v) = -\log{r(u, v)}$.
