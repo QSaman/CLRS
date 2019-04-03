@@ -330,14 +330,39 @@
 	\FloatBarrier
 	\paragraph{Exercise 7}
 	We know that $B$ is an $V \times E$ matrix which we show it as $B_{V \times E}$. By definition $B^T$ is an $E \times V$ matrix which we show it as $B_{E \times V}^T$. We define $P_{V \times V} = B_{V \times E} \times B_{E \times V}^T$.
-	\begin{equation*}
-		p[i, j] = \sum_{k = 1}^{E}b[i, k] \times b^T[k, j]
+	\begin{equation*}	
+	\begin{split}
+		p[i, j] &= \sum_{k = 1}^{|E|}b[i, k] \times b^T[k, j] \\
+		&= \sum_{k = 1}^{|E|}b[i, k] \times b[j, k]
+	\end{split}
 	\end{equation*}
-	We consider two cases.
+	
+	There are two cases:
 	\begin{enumerate}
-		\item $\boldsymbol{i \ne j:}$ It is impossible that both $b[i, k]$ and $b[k, j]$ have the value of "1". Because the k\textsuperscript{th} edge cannot enter both vertices $i$ and $j$. With the same argument we can prove that both of them cannot have value of "-1". If the k\textsuperscript{th} edge connect i to j, then $b[i, k] = -1$ and $b^T[k, j] = 1$. Otherwise both have value of zero. In other words, for $i \ne j$ the value of $p[i, j]$ is the number of edges between $i$ and $j$.
-		\item $\boldsymbol{i = j:}$ It is obvious both $b[i, k]$ and $b[k, i]$ should have the same value. In this case $p[i, i]$ is the sum of all edges that enter and leave the vertex $i$.
+		\item $\boldsymbol{i \ne j:}$
+			\begin{equation*}
+			b[i, k] \times b[j, k] = \begin{cases}
+			-1 \times 1 & k = (i, j) \in E \\
+			1 \times -1 & k = (j, i) \in E \\
+			0 & k = (u, v) \in E \land (u \ne i \lor v \ne j)
+			\end{cases}
+			\end{equation*}
+			
+			So $p[i, j]$ is the number of edges between $i$ and $j$.
+			
+		\item $\boldsymbol{i = j:}$
+		
+			\begin{equation*}
+			b[i, k] \times b[j, k] = b[i, k] \times b[i, k] = \begin{cases}
+			-1 \times -1 & k = (i, u) \in E \\
+			1 \times 1 & k = (u, i) \in E \\
+			0 \times 0 & k = (u, v) \in E \land (u \ne i \land v \ne i)
+			\end{cases}
+			\end{equation*}
+			
+			In this case $p[i, i]$ is the sum of all edges that enter and leave the vertex $i$.		
 	\end{enumerate}
+	We can summarize the answer
 	\begin{equation*}
 		p[i, j] = \begin{cases}
 		\text{number of edges between i and j} & i \ne j \\
