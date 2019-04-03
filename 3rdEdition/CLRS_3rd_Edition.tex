@@ -400,7 +400,7 @@
 	
 	For more information about Lemma 22.3 see the textbook. Note that if we encounter a back edge, it connects two vertices from $[v_1, v_2, \dots , v_r]$. \\
 	
-	Suppose $(u, v)$ is a back edge. According to Lemma 22.3 from the textbook, $u.d \le v.d \land v.d \le u.d + 1$. If $v.d = u.d + 1$, then $u$ and $v$ have different colors. So we only need to consider $u.d = v.d$. In that case both $u$ and $v$ have the same color and we need to prove that this graph cannot be bipartite. When we have a back edge it means that we have a cycle. The number of edges in this cycle is $u.d + v.d + 1 = 2 \times u.d + 1$ which is odd. So the graph cannot be bipartite. Note that the graph can have more than one connected component so it is possible we need to run BFS more than once. We use a new attribute $u.bColor$ which we use for bipartite color as described.
+	Suppose $(u, v)$ is a back edge. According to Lemma 22.3 from the textbook, $u.d \le v.d \land v.d \le u.d + 1$. If $v.d = u.d + 1$, then $u$ and $v$ have different colors. So we only need to consider $u.d = v.d$. In that case both $u$ and $v$ have the same color and we need to prove that this graph cannot be bipartite. When we have a back edge it means that we have a cycle. The number of edges in this cycle is $u.d + v.d + 1 = 2 \times u.d + 1$ which is odd. So the graph cannot be bipartite. Note that the graph can have more than one connected component so it is possible we need to run BFS more than once.
 	\begin{algorithm*}[h!]
 		\caption{Determining whether a graph is bipartite or not}
 		\begin{algorithmic}[1]
@@ -424,7 +424,6 @@
 		\begin{algorithmic}[1]		
 			\Function{BFS}{G, s}
 				\State $s.color = GRAY$
-				\State $s.bColor = 0$ \Comment The color which we use for bipartite algorithm
 				\State $s.d = 0$
 				\State $Q = \emptyset$
 				\State \Call{Enqueue}{Q, s}
@@ -437,8 +436,13 @@
 							\State $v.d = u.d + 1$
 							\State $v.\pi = u$
 							\State \Call{Enqueue}{Q, v}
-						\ElsIf{u.bColor == v.bColor} \Comment edge $(u, v)$ is a back edge
+						\ElsIf{u.d == v.d + 1} \Comment v.color is Black
+							\State continue							
+						\ElsIf{v.d == u.d + 1} \Comment v.color is GRAY (back edge)
+							\State Continue
+						\ElsIf{u.d == v.d} \Comment v.color is GRAY (back edge)
 							\State \Return $FALSE$
+
 						\EndIf
 					\EndFor
 					\State $u.color = BLACK$
