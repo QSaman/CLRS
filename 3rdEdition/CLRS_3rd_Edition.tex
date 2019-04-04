@@ -378,6 +378,7 @@
 			\begin{figure}[h!]
 				\centering
 				\caption{DFS tree}
+				\label{fig:DFS tree}
 				\begin{tikzpicture}
 				\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
 				\tikzset{snake it/.style={
@@ -398,9 +399,9 @@
 			
 	\textbf{Lemma 22.3: } Suppose that during the execution of BFS on graph G = (V, E), the queue Q contains the vertices $[v_1, v_2, \dots , v_r]$, where $v_1$ is the head of Q and $v_r$ is the tail. Then $v_r.d \le v_1.d$ and $v_i.d \le v_{i+1}.d$ for $i = 1, 2, \dots, r - 1$.\\
 	
-	For more information about Lemma 22.3 see the textbook. Suppose $Q = \{v_1, v_2, \dots , v_r\}$ as we defined it in Lemma 22.3. Note that if we encounter a back edge, it connects two vertices (u, v) that $u \notin Q \land v \in Q$. \\
+	For more information about Lemma 22.3 see the textbook. Suppose $Q = \{v_1, v_2, \dots , v_r\}$ as we defined it in Lemma 22.3. Note that if we encounter a back edge, it connects two vertices (u, v) that $u \in Q \land v \in Q$. To be more specific, first we pop $u$ from queue and then we find out $(u, v)$ is a back edge. In that moment $u \notin Q \land v \in Q$.\\
 	
-	Suppose $(u, v)$ is a back edge. According to Lemma 22.3 from the textbook, $u.d \le v.d \land v.d \le u.d + 1$. If $v.d = u.d + 1$, then $u$ and $v$ have different colors. So we only need to consider $u.d = v.d$. In that case both $u$ and $v$ have the same color and we need to prove that this graph cannot be bipartite. When we have a back edge it means that we have a cycle. The number of edges in this cycle is $u.d + v.d + 1 = 2 \times u.d + 1$ which is odd. So the graph cannot be bipartite. Note that the graph can have more than one connected component so it is possible we need to run BFS more than once.
+	Suppose $(u, v)$ is a back edge. According to Lemma 22.3 from the textbook, $u.d \le v.d \land v.d \le u.d + 1$. If $v.d = u.d + 1$, then $u$ and $v$ have different colors. So we only need to consider $u.d = v.d$. In that case both $u$ and $v$ have the same color and we need to prove that this graph cannot be bipartite. When we have a back edge it means that we have a cycle (see figure \ref{fig:DFS tree}). The number of edges in this cycle is $u.d + v.d + 1 = 2 \times u.d + 1$ which is odd. So the graph cannot be bipartite. Note that the graph can have more than one connected component so it is possible we need to run BFS more than once.
 	\begin{algorithm*}[h!]
 		\caption{Determining whether a graph is bipartite or not}
 		\begin{algorithmic}[1]
@@ -432,7 +433,6 @@
 					\ForAll{$v \in G.adj[u]$}
 						\If{$v.color == WHITE$} \Comment edge $(u, v)$ is a tree edge
 							\State $v.color = GRAY$
-							\State $v.bColor = 1 - u.bColor$
 							\State $v.d = u.d + 1$
 							\State $v.\pi = u$
 							\State \Call{Enqueue}{Q, v}
