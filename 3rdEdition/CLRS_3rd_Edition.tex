@@ -369,7 +369,54 @@
 		indegree(i) + outdegree(i) & i = j
 		\end{cases}
 	\end{equation*}
+	
 	\section{Breadth-first search}
+	
+	\paragraph{BFS algorithm}
+	For understanding the following algorithm see Lemma 22.3 from the textbook.
+	
+	\textbf{Lemma 22.3: } Suppose that during the execution of BFS on graph G = (V, E), the queue Q contains the vertices $[v_1, v_2, \dots , v_r]$, where $v_1$ is the head of Q and $v_r$ is the tail. Then $v_r.d \le v_1.d$ and $v_i.d \le v_{i+1}.d$ for $i = 1, 2, \dots, r - 1$.\\
+	
+	\begin{algorithm*}[h!]
+		\caption{BFS algorithm}
+		\begin{algorithmic}
+			\Statex
+		\end{algorithmic}
+		\begin{algorithmic}[1]		
+			\Function{BFS}{G, s}
+				\ForAll{$u \in G.V - \{s\}$}
+					\State $u.color = WHITE$
+					\State $u.d = \infty$
+					\State $u.\pi = NIL$
+				\EndFor
+				\State $s.color = GRAY$
+				\State $s.d = 0$
+				\State $s.\pi = NIL$
+				\State $Q = \emptyset$
+				\State \Call{Enqueue}{Q, s}
+				\While{$Q \ne \emptyset$}
+					\State $u = $ \Call{Dequeue}{Q}
+					\ForAll{$v \in G.adj[u]$}
+						\If{$v.color == WHITE$} \Comment edge $(u, v)$ is a tree edge
+							\State $v.color = GRAY$
+							\State $v.d = u.d + 1$
+							\State $v.\pi = u$
+							\State \Call{Enqueue}{Q, v}
+						\ElsIf{u.d == v.d + 1}
+							\State \Call{Assert}{$v.color == BLACK$}						
+						\ElsIf{v.d == u.d + 1} \Comment back edge
+							\State \Call{Assert}{$v.color == GRAY$}
+						\ElsIf{u.d == v.d} \Comment back edge
+							\State \Call{Assert}{$v.color == GRAY$}
+
+						\EndIf
+					\EndFor
+					\State $u.color = BLACK$
+				\EndWhile
+			\EndFunction
+		\end{algorithmic}				
+	\end{algorithm*}
+	\FloatBarrier	
 	\paragraph{Exercise 7}
 	We need to determine whether an undirected graph is bipartite or not. We can paint the vertices of a bipartite graph with two colors in such a way that no two adjacent vertices share the same color.\\
 	We can easily prove that if there is a cycle in graph in which the number of edges is odd, then the graph cannot be bipartite. \\
