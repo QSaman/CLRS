@@ -371,11 +371,54 @@
 	\end{equation*}
 	
 	\section{Breadth-first search}
-	
+	\label{psec:BFSAlgorithm}
 	\paragraph{BFS algorithm}
 	For understanding the following algorithm see Lemma 22.3 from the textbook.
 	
 	\textbf{Lemma 22.3: } Suppose that during the execution of BFS on graph G = (V, E), the queue Q contains the vertices $[v_1, v_2, \dots , v_r]$, where $v_1$ is the head of Q and $v_r$ is the tail. Then $v_r.d \le v_1.d$ and $v_i.d \le v_{i+1}.d$ for $i = 1, 2, \dots, r - 1$.\\
+	
+	\begin{itemize}
+		\item Note that in BFS if $(u, v)$ is a back edge (v is the ancestor of u in BFS tree), then the color of v is black (In DFS it's gray).
+		
+				
+		\item If $(u, v)$ is a cross edge, the color of $v$ is gray. Unlike DFS in which the color of $v$ is black.
+		
+		\item In BFS both directed and undirected graphs can have cross edges.
+		
+		\item If the graph is undirected, a cross edge in BFS means we have an undirected cycle in graph.
+		
+		\item Since in an undirected graph $(u, v) \in E$ means $(v, u) \in E$, we always have back edges. In other words for all tree edges $(u, v)$, $(v, u)$ is a back edge. This is true for both BFS and DFS algorithms.
+		
+		\item It's better to use BFS for finding cycles in undirected graphs. If we encounter a cross edge, we have a cycle. For directed graphs, it's better to use DFS. If we have a back edge, it means we have a cycle.
+		 
+	\end{itemize}
+	
+	
+	As you can see $(u, v)$ cannot be a forward edge (u is the ancestor of v) in BFS algorithm. \\
+	
+	\textbf{Proof:} Suppose in BFS first we discover $u$ and $(u, v) \in E$ and $w$ is reachable from $u$. The shortest path from $u$ to $w$ is $\{v_1, v_2, \dots, v_k\}$ for $k > 2$. See figure \ref{fig:No forward edge in BFS}. In order $(u, v)$ be a forward edge, we must discover $w$ before $v$. According to BFS properties it's $v$ which is discovered first.
+	
+	\begin{figure}[h!]
+		\centering
+		\caption{No forward edge in BFS}
+		\label{fig:No forward edge in BFS}
+		\begin{tikzpicture}
+		\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+		\tikzset{snake it/.style={
+				decoration={snake, 
+					amplitude = 1mm,
+					segment length = 8mm,
+					post length=0.9mm},decorate}}
+		%vertices
+		\node[vertex] (u) at (1, 2) {$u$};
+		\node[vertex] (w) at (0, 0) {$w$};
+		\node[vertex] (v) at (1, 0) {$v$};
+		%edges
+		\path (u) edge[snake it] (w);
+		\path (w) edge (v);
+		\path (u) edge (v);
+		\end{tikzpicture}
+	\end{figure}
 	
 	\begin{algorithm*}[h!]
 		\caption{BFS algorithm}
@@ -402,11 +445,11 @@
 							\State $v.d = u.d + 1$
 							\State $v.\pi = u$
 							\State \Call{Enqueue}{Q, v}
-						\ElsIf{u.d == v.d + 1}
+						\ElsIf{u.d == v.d + 1} \Comment back edge
 							\State \Call{Assert}{$v.color == BLACK$}						
-						\ElsIf{v.d == u.d + 1} \Comment back edge
+						\ElsIf{v.d == u.d + 1} \Comment cross edge
 							\State \Call{Assert}{$v.color == GRAY$}
-						\ElsIf{u.d == v.d} \Comment back edge
+						\ElsIf{u.d == v.d} \Comment cross edge
 							\State \Call{Assert}{$v.color == GRAY$}
 
 						\EndIf
@@ -420,7 +463,7 @@
 	\paragraph{Exercise 7}
 	We need to determine whether an undirected graph is bipartite or not. We can paint the vertices of a bipartite graph with two colors in such a way that no two adjacent vertices share the same color.\\
 	We can easily prove that if there is a cycle in graph in which the number of edges is odd, then the graph cannot be bipartite. \\
-	We can use BFS. We know that in an undirected graph we can only have tree and back edges (see \ref{psec:EdgeClassification}). We run BFS on an arbitrary vertex $s$. Suppose $u$ is reachable from $s$. If $u.d$ is even we color that vertex "blue" otherwise we color it "red". For tree edges we don't have any problem. We need to think about back edges. We know that $\delta(s, u) = u.d$ which is the shortest path from $s$ to $u$. \\
+	We can use BFS. We know that in BFS algorithm we can only have tree and back and cross edges (see \ref{psec:BFSAlgorithm}). Note that in BFS we can have cross edges whether or not the graph is directed. We run BFS on an arbitrary vertex $s$. Suppose $u$ is reachable from $s$. If $u.d$ is even we color that vertex "blue" otherwise we color it "red". For tree edges we don't have any problem. Since in back edges in BFS there is a parent-child relationship between two vertices of an endge, we don't have any problem with back edges. We need to think about cross edges. We know that $\delta(s, u) = u.d$ which is the shortest path from $s$ to $u$. \\
 	
 			\begin{figure}[h!]
 				\centering
@@ -446,9 +489,9 @@
 			
 	\textbf{Lemma 22.3: } Suppose that during the execution of BFS on graph G = (V, E), the queue Q contains the vertices $[v_1, v_2, \dots , v_r]$, where $v_1$ is the head of Q and $v_r$ is the tail. Then $v_r.d \le v_1.d$ and $v_i.d \le v_{i+1}.d$ for $i = 1, 2, \dots, r - 1$.\\
 	
-	For more information about Lemma 22.3 see the textbook. Suppose $Q = \{v_1, v_2, \dots , v_r\}$ as we defined it in Lemma 22.3. Note that if we encounter a back edge, it connects two vertices (u, v) that $u \in Q \land v \in Q$. To be more specific, first we pop $u$ from queue and then we find out $(u, v)$ is a back edge. In that moment $u \notin Q \land v \in Q$.\\
+	For more information about Lemma 22.3 see the textbook. Suppose $Q = \{v_1, v_2, \dots , v_r\}$ as we defined it in Lemma 22.3. Note that if we encounter a cross edge, it connects two vertices (u, v) that $u \in Q \land v \in Q$. To be more specific, first we pop $u$ from queue and then we find out $(u, v)$ is a cross edge. In that moment $u \notin Q \land v \in Q$.\\
 	
-	Suppose $(u, v)$ is a back edge. According to Lemma 22.3 from the textbook, $u.d \le v.d \land v.d \le u.d + 1$. If $v.d = u.d + 1$, then $u$ and $v$ have different colors. So we only need to consider $u.d = v.d$. In that case both $u$ and $v$ have the same color and we need to prove that this graph cannot be bipartite. When we have a back edge it means that we have a cycle (see figure \ref{fig:DFS tree}). The number of edges in this cycle is $u.d + v.d + 1 = 2 \times u.d + 1$ which is odd. So the graph cannot be bipartite. Note that the graph can have more than one connected component so it is possible we need to run BFS more than once.
+	Suppose $(u, v)$ is a cross edge. According to Lemma 22.3 from the textbook, $u.d \le v.d \land v.d \le u.d + 1$. If $v.d = u.d + 1$, then $u$ and $v$ have different colors. So we only need to consider $u.d = v.d$. In that case both $u$ and $v$ have the same color and we need to prove that this graph cannot be bipartite. When we have a cross edge in an undirected graph, it means that we have a cycle (see figure \ref{fig:DFS tree}). The number of edges in this cycle is $u.d + v.d + 1 = 2 \times u.d + 1$ which is odd. So the graph cannot be bipartite. Note that the graph can have more than one connected component so it is possible we need to run BFS more than once.
 	\begin{algorithm*}[h!]
 		\caption{Determining whether a graph is bipartite or not}
 		\begin{algorithmic}[1]
@@ -485,9 +528,9 @@
 							\State \Call{Enqueue}{Q, v}
 						\ElsIf{u.d == v.d + 1} \Comment v.color is Black
 							\State continue							
-						\ElsIf{v.d == u.d + 1} \Comment v.color is GRAY (back edge)
+						\ElsIf{v.d == u.d + 1} \Comment v.color is GRAY (cross edge)
 							\State Continue
-						\ElsIf{u.d == v.d} \Comment v.color is GRAY (back edge)
+						\ElsIf{u.d == v.d} \Comment v.color is GRAY (cross edge)
 							\State \Return $FALSE$
 
 						\EndIf
@@ -614,7 +657,9 @@
 	\begin{itemize}
 	\item[\textbf{Tree edges}] are edges in the depth-first forest $G_\pi$. Edge $(u, v)$ is a tree edge if v was discovered by exploring edge $(u, v)$
 	\item[\textbf{Back edges}] are those edges $(u, v)$ connecting a vertex $u$ to \textbf{an ancestor} $v$ in a depth-first tree. We consider self-loops, which may occur in directed graphs, to be back edges.\\
-	Note that a directed graph is acyclic if and only if a depth-first search yields no back edges. Undirected graphs are tricky. Since $(u, v) \in E \land (v, u) \in E$, $(u, v)$ is a back edge if and only if $(v, u)$ is a tree edge.
+	Note that a directed graph is acyclic if and only if a depth-first search yields no back edges.\\
+	
+	Undirected graphs are tricky. Since $(u, v) \in E \land (v, u) \in E$, $(u, v)$ is a back edge if and only if $(v, u)$ is a tree edge.
 	\item[\textbf{Forward edges}] are those nontree edges $(u, v)$ connecting a vertex $u$ to a descendant $v$ in a depth-first tree.
 	\item[\textbf{Cross edges}] are all other edges. They can go between vertices in the same depth-first tree, as long as one vertex is not an ancestor of the other, or they can go between vertices in different depth-first trees.
 	\end{itemize}
@@ -644,7 +689,7 @@
 			\item Directed graph
 			\begin{itemize}
 				\item DFS: We can have forward edges
-				\item BFS: We can't have forward edges. Suppose we can have forward edge $(u, v)$. According to forward edge properties we can say $u.d < v.d$ (if $u.d = v.d$ it's cross edge) and according to BFS properties $v.d \le u.d + 1$. Hence $0 < v.d - u.d \le 1$. If $v.d = u.d + 1$ it is a tree edge, unless we have a multigraph. So $(u, v)$ cannot be a forward edge.
+				\item BFS: We can't have forward edges. Refer to the beginning of chapter \ref{psec:BFSAlgorithm}
 			\end{itemize}
 			\item Undirected graph
 			\begin{itemize}
@@ -657,12 +702,12 @@
 			\item Directed graph
 			\begin{itemize}
 				\item DFS: We can have back edges
-				\item BFS: We can have back edges. Suppose $(u, v)$ is a back edge. Since we discover $v$ first we can say $v.d \le u.d$. According to BFS properties we can say $v.d \le u.d + 1$. Hence $v.d -u.d \le 1$. Note that we have only upper bound. So it is possible $v.d - u.d < 0$
+				\item BFS: We can have back edges. Suppose $(u, v)$ is a back edge, then $v$ is the parent of $u$. For more information see the beginning of chapter \ref{psec:BFSAlgorithm}.
 			\end{itemize}
 			\item Undirected graph
 			\begin{itemize}
 				\item DFS: We can have back edges
-				\item BFS: We can have back edges. Suppose $(u, v)$ is a back edge. Since we discover $v$ first we can say $v.d \le u.d$. We know that $(v, u)$ is also an edge. According to BFS properties $u.d \le v.d + 1$. Hence $0 \le u.d - v.d \le 1$
+				\item BFS: We can have back edges. Suppose $(u, v)$ is a back edge, then $v$ is the parent of $u$ for more information see the beginning of chapter \ref{psec:BFSAlgorithm}.
 			\end{itemize}
 		\end{itemize}
 		\item \textbf{Cross edge}
@@ -670,12 +715,12 @@
 			\item Directed graph
 			\begin{itemize}
 				\item DFS: We can have cross edges
-				\item BFS: We can have cross edges. Suppose $(u, v)$ is a cross edge. Since we discover $v$ first we can say $v.d \le u.d$. According to BFS properties we can say $v.d \le u.d + 1$. Hence $v.d - u.d \le 1$. Note that we only have upper bound. It is possible that $v.d - u.d < 0$. See figure \ref{fig:BfsCrossEdgeDirectedGraph}
+				\item BFS: We can have cross edges. refer to the beginning of chapter \ref{psec:BFSAlgorithm}. For an example see figure \ref{fig:BfsCrossEdgeDirectedGraph}
 			\end{itemize}
 			\item Undirected graph
 			\begin{itemize}
 				\item DFS: We can't have cross edges
-				\item BFS: We can't have cross edges
+				\item BFS: We can have cross edges. See the beginning of chapter \ref{psec:BFSAlgorithm}.
 			\end{itemize}
 		\end{itemize}		
 	\end{itemize}
