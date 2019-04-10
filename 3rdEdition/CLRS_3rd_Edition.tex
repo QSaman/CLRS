@@ -482,7 +482,7 @@
 		
 		\item Since in an undirected graph $(u, v) \in E$ means $(v, u) \in E$, we always have back edges. In other words for all tree edges $(u, v)$, $(v, u)$ is a back edge. This is true for both BFS and DFS algorithms.
 		
-		\item It's better to use BFS for finding cycles in undirected graphs. If we encounter a cross edge, we have a cycle. For directed graphs, it's better to use DFS. If we have a back edge, it means we have a cycle.
+		\item It's better to use BFS for finding cycles in undirected graphs. If we encounter a cross edge, we have a cycle. For directed graphs, it's better to use DFS. If we have a back edge, it means we have a cycle. If you want to use DFS for undirected graph see \textbf{Exercise 10 of DFS}.
 	 
 	\end{itemize}
 		
@@ -906,7 +906,7 @@
 	
 	\FloatBarrier
 	\paragraph{Exercise 10}
-	In an undirected graph forward edges are equivalent to back edges and cross edges are equivalent to tree edges. Although the following modification works for both directed and undirected graph, you can remove portion of code that is related to "forward" and "cross" edges to save space.
+	The algorithm for directed graph:
 	\begin{algorithm*}
 		\begin{algorithmic}[1]
 			\Function {DFS-VISIT}{G, u}
@@ -932,6 +932,37 @@
 			\EndFunction
 		\end{algorithmic}
 	\end{algorithm*}
+	\FloatBarrier
+	
+	In an undirected graph forward edges are equivalent to back edges and cross edges are equivalent to tree edges. In other words we only have tree and back edges. Another tricky thing that we need to handle: if $(u, v) \in E$ then $(v, u) \in E$. So if we consider $(u, v)$ as a tree edge then $(v, u)$ is a back edge. In most cases this is not desirable. So we assume if $(u, v)$ is a tree edge, then $(v, u)$ is also a tree edge. Another tricky thing is back edges. If $(u, v)$ is a back edge, then $(v, u)$ is also a back edge. When we are visiting edge $(u, v)$ the color of $v$ is GRAY. On the other side when we are visiting edge $(v, u)$ (which is after visiting edge $(u, v)$), the color of $u$ is BLACK.
+	
+		\begin{algorithm*}
+			\begin{algorithmic}[1]
+				\Function {DFS-VISIT}{G, u}
+					\State $time = time + 1$
+					\State $u.d = time$
+					\State $u.color = GRAY$
+					\ForAll{$v \in G.adj[u]$}
+						\If{$v.color == WHITE$} \Comment edge $(u, v)$ is a tree edge
+							\State \Call{PRINT-EDGE}{u, v, TREE}
+							\State $v.\pi = u$
+							\State \Call{DFS-VISIT}{$G, v$}
+						\ElsIf{$v.color == GRAY \land v.\pi == u$} \Comment edge $(u, v)$ is a tree edge
+							\State \Call{PRINT-EDGE}{u, v, TREE}
+						\ElsIf{$v.color == GRAY \land v.\pi \ne u$} \Comment edge $(u, v)$ is a back edge
+						\State \Call{PRINT-EDGE}{u, v, BACK}
+						\Else	\Comment $v.COLOR$ is BLACK
+							\State \Call{PRINT-EDGE}{u, v, BACK}
+						\EndIf
+					\EndFor
+					\State $u.color = BLACK$
+					\State $time = time + 1$
+					\State $u.f = time$
+				\EndFunction
+			\end{algorithmic}
+		\end{algorithm*}
+		\FloatBarrier
+		
 	\paragraph{Exercise 11}
 	If both incoming and outgoing edges are cross, that happens. Consider the following example. Suppose DFS starts at $s$, then $u$ and finally at $w$.
 	\begin{figure*}[h!]
