@@ -877,62 +877,33 @@
 	\text{\textbf{Cross edge: }} v.d &< v.f < u.d < u.f \\
 	\end{split}
 	\end{align*}
-	As you can see only in cross edge the discovery of one endpoint is after the other finished. We need to prove that if there is a path from $u$ to $v$, it is possible to have $v.d > u.f$. In other words, edge $(v, u)$ is a cross edge and there is a path from $u$ to $v$ in which there is at least one edge which is not a tree edge. We can make counterexample even simpler by removing the cross edge. Note that the root of DFS tree is vertex $s$. In general if there is a cycle from $s$ to $u$ and $u$ to $s$, then it is possible $v.d > u.f$.
+	We want to find an example in which there is a path from $u$ to $v$ such that $u.f < v.d$. In the path from $u$ to $v$ there should be at least one edge $(w, x)$ which is not a tree edge and $w.f < x.f$ so all ancestors of $w$, including $u$ have a chance to finish before all  descendants of $x$, including $v$. As you can see only back edge has such property. This is like previous example. We start DFS from $x$ and then first visiting u and then finally v. So we have $x.d < u.d < w.d < w.f < u.f < v.d < v.f < x.f$.
 	
 	\begin{figure*}[h!]
 		\centering
-		\caption{Counterexample using cross edge}
+		\caption{Counterexample using back edge}
 		\begin{tikzpicture}
-			\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
-			\tikzset{edge/.style = {->,> = latex'}}
-			% vertices
-			\node[vertex] (s) at (0, 0) {$s$};
-			\node[vertex] (u) at (2, -2) {$u$};
-			\node[vertex] (v) at (-2, -2) {$v$};
-			% edges
-			\draw[edge] (s) -- (u) node[midway, above, rotate=-45] {T};
-			\draw[edge] (v) -- (u) node[midway, above] {C};
-			\draw[edge] (s) -- (v) node[midway, above, rotate=45] {T};
-			\draw[edge] (u) edge[bend right] node [midway, above, rotate=-45] {B} (s);
-		\end{tikzpicture}		
-	\end{figure*}
-	\begin{figure*}[h!]
-		\centering
-		\caption{Counterexample without cross edge}
-		\begin{tikzpicture}
-		\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
-		\tikzset{edge/.style = {->,> = latex'}}
-		% vertices
-		\node[vertex] (s) at (0, 0) {$s$};
-		\node[vertex] (u) at (2, -2) {$u$};
-		\node[vertex] (v) at (-2, -2) {$v$};
-		% edges
-		\draw[edge] (s) -- (u) node[midway, above, rotate=-45] {T};
-		\draw[edge] (s) -- (v) node[midway, above, rotate=45] {T};
-		\draw[edge] (u) edge[bend right] node [midway, above, rotate=-45] {B} (s);				
-		\end{tikzpicture}		
-	\end{figure*}
-	\begin{figure*}[h!]
-		\centering
-		\caption{General counterexample}
-		\begin{tikzpicture}
-		\tikzset{vertex/.style = {shape=circle,draw,minimum size=1.5em}}
-		\tikzset{edge/.style = {->,> = latex'}}
+		\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+		\tikzset{edge/.style={->, > = latex'}}
 		\tikzset{snake it/.style={-stealth,
 				decoration={snake, 
-					amplitude = .4mm,
-					segment length = 2mm,
+					amplitude = 1mm,
+					segment length = 8mm,
 					post length=0.9mm},decorate}}			
-		% vertices
-		\node[vertex] (s) at (0, 0) {$s$};
-		\node[vertex] (u) at (2, -2) {$u$};
-		\node[vertex] (v) at (-2, -2) {$v$};
-		% edges
-		\path[edge] (s) edge[bend left, snake it] (u);
-		\path[edge] (s) edge[snake it] (v);
-		\path[edge] (u) edge[bend left, snake it](s);				
-		\end{tikzpicture}		
-	\end{figure*}		
+					%vertices
+					\node[vertex] (s) at (6, 0) {$x$};
+					\node[vertex] (u) at (0, 0) {$u$};
+					\node[vertex] (w) at (4, 0) {$w$};
+					\node[vertex] (v) at (10, 0) {$v$};
+					%edges
+					\path[edge] (s) edge[snake it, bend left] node[midway, above] {T} (u);
+					\path[edge] (u) edge[snake it] node[midway, above] {T} (w);
+					\draw[edge] (w) -- (s) node[midway, above]{B};
+					\path[edge] (s) edge[snake it] node[midway, above]{T}(v);
+					
+					\end{tikzpicture}
+					\end{figure*}	
+	
 	\FloatBarrier
 	\paragraph{Exercise 10}
 	In an undirected graph forward edges are equivalent to back edges and cross edges are equivalent to tree edges. Although the following modification works for both directed and undirected graph, you can remove portion of code that is related to "forward" and "cross" edges to save space.
