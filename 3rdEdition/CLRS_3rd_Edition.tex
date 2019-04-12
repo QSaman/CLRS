@@ -1055,12 +1055,14 @@
 		\end{tikzpicture}
 	\end{figure}
 	I thought I can design an $O(V + E)$ algorithm to solve this problem. I was wrong.
-	\subparagraph{Wrong idea}
+	\subparagraph{Wrong idea 1}
 	Start DFS from an arbitrary vertex $s$. If you found "forward" or "cross" edges then it is not singly connected so the algorithm terminates. After DFS finished, it is possible we have unvisited vertices.
+	
+	\subparagraph{Wrong idea 2}
 	\begin{itemize}
-		\item[] \textbf{component:} All undiscovered vertices which will be discover in one DFS run. For example if we run DFS from $x_3$ in figure \ref{fig:NonSinglyConnectedGraph}, $x_3$, $x_1$ and $u$ are belong to the same component.
+		\item[] \textbf{component:} All undiscovered vertices which will be discover in one DFS run. For example if we run DFS from $x_3$ in figure \ref{fig:NonSinglyConnectedGraph}, $x_3$, $x_1$ and $u$ are belong to the same component. In other words a component is a DFS tree
 	\end{itemize}
-	We can determine and number the components (similar to connected components). If we find "forward" or "cross" edges within each component, the algorithm terminates. Note that "cross" edges between components is not trivial. We can have singly connected graph which has at least one cross edge between its components. We can create a new graph which its vertices are the components of input graph and its edges are the cross edges between components. Suppose in figure \ref{fig:NonSinglyConnectedGraph} we run DFS first on $x_3$, then $x_4$ and finally $u$. You can see the result in figure \ref{fig:GraphOfComponents}. This algorithm is not always correct. Suppose we run DFS first on $v$, $x_1$, $x_2$, $x_3$, $x_4$ and finally $u$. As you can see we don't have any tree edges and the graph of components is same as original one.
+	We can determine and number the components (similar to connected components). If we find "forward" or "cross" edges within each component, the algorithm terminates. Note that "cross" edges between components is not trivial. We can have singly connected graph which has at least one cross edge between its components. We can create a new graph which its vertices are the components of input graph and its edges are the cross edges between components. Suppose in figure \ref{fig:NonSinglyConnectedGraph} we run DFS first on $x_3$, then $x_4$ and finally $u$. You can see the result in figure \ref{fig:GraphOfComponents}. This algorithm is not always correct. Suppose we run DFS again on new graph (figure \ref{fig:GraphOfComponents}) first on node $\{x_3, x_1, v\}$, then $\{x_4, x_2\}$ and finally $\{u\}$. As you can see we don't have any tree edges but only cross edges. In this scenario we cannot combine some nodes to get a new graph with smaller number of nodes.
 	\begin{figure}[h!]
 		\centering
 		\caption{Graph of components}
@@ -1083,6 +1085,10 @@
 		\draw[edge] (x4) -- (v);
 		\end{tikzpicture}
 	\end{figure}
+	\subparagraph{Wrong Idea 3}
+	If you google for solution you may find a solution which suggest to run topological sort. This algorithm assumes that we have at least one vertex with indegree zero which is not a correct assumption for singly connected graph.
+	\subparagraph{Correct Answer}
+	Since we don't know on which vertex we must start the DFS algorithm, we run DFS on every vertex $v \in V$. In every run we initialize all vertices attributes (.e.g $v.color = WHITE$). If we encounter forward or cross edges (note that we reset attributes in each run, so the cross edges are only in the same DFS tree and we don't encounter cross edges between two different DFS trees), we know that it's not singly connected. The runtime of this algorithm is $O(V \times (V+E))$.
 	\chapter{Minimum Spanning Trees}
 	For questions similar to Prim's minimum spanning tree see "Variants" in chapter \ref{psec:ShortestPathClassification}.
 	\section{Problems}
