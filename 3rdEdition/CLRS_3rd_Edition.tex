@@ -1025,7 +1025,7 @@
 	\end{algorithm}
 	\FloatBarrier
 	\paragraph{Exercise 13}
-	It is obvious that we should only have tree and back edges. It is important to start from the right vertex. Consider figure \ref{fig:NonSinglyConnectedGraph}. There is exactly two distinct paths between $u$ and $v$. If we start the DFS from $u$, in the first run we can detect that the graph is not singly connected.
+	It is obvious that we should only have tree and back edges and possibly some cross edges. If we have a cross edge in the same DFS tree it's not a singly connected graph. But If we have cross edges between different DFS trees, it's possible that it's not a single connected graph (See figure \ref{fig:GraphOfComponents}). It is important to start from the right vertex. Consider figure \ref{fig:NonSinglyConnectedGraph}. There is exactly two distinct paths between $u$ and $v$. If we start the DFS from $u$, in the first run we can detect that the graph is not singly connected.
 	\begin{figure}[h!]
 		\centering
 		\caption{non singly connected graph}
