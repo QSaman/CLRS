@@ -482,7 +482,7 @@
 		
 		\item Since in an undirected graph $(u, v) \in E$ means $(v, u) \in E$, we always have back edges. In other words for all tree edges $(u, v)$, $(v, u)$ is a back edge. This is true for both BFS and DFS algorithms.
 		
-		\item It's better to use BFS for finding cycles in undirected graphs. If we encounter a cross edge, we have a cycle. For directed graphs, it's better to use DFS. If we have a back edge, it means we have a cycle. If you want to use DFS for undirected graph see \textbf{Exercise 10 of DFS}.
+		\item It's easier to use BFS for finding cycles in undirected graphs which takes $O(V + E)$. If we encounter a cross edge, we have a cycle. If we want a faster approach for undirected graph, we need to use DFS which takes $O(V)$. for more information see exercise 3 of Topological sort. For directed graphs, it's better to use DFS. If we have a back edge, it means we have a cycle. If you want to use DFS for undirected graph see \textbf{Exercise 10 of DFS}.
 	 
 	\end{itemize}
 		
@@ -1089,6 +1089,80 @@
 	If you google for solution you may find a solution which suggest to run topological sort. This algorithm assumes that we have at least one vertex with indegree zero which is not a correct assumption for singly connected graph.
 	\subparagraph{Correct Answer}
 	Since we don't know on which vertex we must start the DFS algorithm, we run DFS on every vertex $v \in V$. In every run we initialize all vertices attributes (.e.g $v.color = WHITE$). If we encounter forward or cross edges (note that we reset attributes in each run, so the cross edges are only in the same DFS tree and we don't encounter cross edges between two different DFS trees), we know that it's not singly connected. The runtime of this algorithm is $O(V \times (V+E))$.
+	
+	\section{Topological Sort}
+	\paragraph{Exercise 2}
+	Note that since it's a acyclic graph, we cannot have back edges. We add an attribute name $path$ to each vertex which holds the number of simple paths from that vertex to $t$. The running time of this algorithm is $O(V + E)$.
+	\begin{algorithm*}
+		\begin{algorithmic}[1]
+			\Function {DFS}{G, s, t}
+				\ForAll{$u \in G.V$}
+					\State $u.color = WHITE$
+					\State $u.\pi = NIL$
+					\State $u.path = 0$	\Comment $u.path$ is the number of simple paths from $u$ to $t$
+				\EndFor
+			\State $time = 0$
+			\State \Call{DFS-VISIT}{$G, s, t$}
+			\EndFunction
+			
+			\Function {DFS-VISIT}{G, u, t}	
+				\State $time = time + 1$
+				\State $u.d = time$
+				\State $u.color = GRAY$
+				\If{$u == t$}
+					\State $u.path = 1$
+					\State $u.color = BLACK$
+					\State return
+				\EndIf
+				\ForAll{$v \in G.adj[u]$}
+					\If{$v.color == WHITE$} \Comment edge $(u, v)$ is a tree edge
+						\State $v.\pi = u$
+						\State \Call{DFS-VISIT}{$G, v, t$}
+						\State $u.path = u.path + v.path$					
+					\ElsIf{$u.d < v.d$}	\Comment edge $(u, v)$ is a forward edge
+						\State $u.path = u.path + v.path$
+					\Else	\Comment edge $(u, v)$ is a cross edge
+						\State $u.path = u.path + v.path$
+					\EndIf
+				\EndFor
+				\State $u.color = BLACK$
+				\State $time = time + 1$
+				\State $u.f = time$
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier	
+	\paragraph{Exercise 3}
+	Since the graph is undirected, we encounter only tree and back edges. Note that for all tree edges $(u, v)$, edge $(v, u)$ is a back edge. In this case we consider it as tree edge. In other words, we assume that if edge $(u, v)$ is a back edge, then $v$ is not the parent of $u$. We start DFS on the graph If we encounter a back edge, we terminate the algorithm immediately. We visit every vertex only once. We also visit tree edges only once. If the DFS tree has at least one back edge, we only visit one of those back edges. So the running time of algorithm is the number of vertices plus the number of tree edges plus one back edge: $O(V + V - 1 + 1) = O(V)$.
+	
+	\begin{algorithm*}
+		\begin{algorithmic}[1]
+			\Function {DFS-VISIT}{G, u}
+				\State $time = time + 1$
+				\State $u.d = time$
+				\State $u.color = GRAY$
+				\ForAll{$v \in G.adj[u]$}
+					\If{$v.color == WHITE$} \Comment tree edge
+						\State $v.\pi = u$
+						\If {\Call{DFS-VISIT}{$G, v$}}
+							\State return TRUE
+						\EndIf
+					\ElsIf{$v.color == GRAY \land v.\pi == u$} \Comment  tree edge
+						\State continue
+					\ElsIf{$v.color == GRAY \land v.\pi \ne u$} \Comment back edge
+					\State return TRUE
+					\Else	\Comment $v.COLOR$ is BLACK
+						\State continue	\Comment we never reach this
+					\EndIf
+				\EndFor
+				\State $u.color = BLACK$
+				\State $time = time + 1$
+				\State $u.f = time$
+				\State return FALSE
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier		
 	\chapter{Minimum Spanning Trees}
 	For questions similar to Prim's minimum spanning tree see "Variants" in chapter \ref{psec:ShortestPathClassification}.
 	\section{Problems}
