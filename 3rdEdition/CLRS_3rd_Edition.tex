@@ -1162,7 +1162,30 @@
 			\EndFunction
 		\end{algorithmic}
 	\end{algorithm*}
-	\FloatBarrier		
+	\FloatBarrier
+	
+	\section{Strongly connected components}
+	The algorithm for SCC:
+	
+	\begin{enumerate}
+	\item call $DFS(G)$ to compute finishing time $u.f$ for all vertices $u \in G.V$
+	\item Compute $G^T$. Remember $(u, v) \in G^T.V$ if $(v, u) \in G.V$
+	\item call $DFS(G^T)$, but in the main loop of $DFS$ (the loop in which you run DFS-VISIT for white vertices), consider the vertices in order of decreasing $u.f$ (as computed in line 1). In other words run $DFS(G^T)$ in topological sort order of $DFS(G)$ which is computed in line 1
+	\item output the vertices of each tree in the depth-first forest formed in line 3 as a separate strongly connected component. We are, in essence, visiting the vertices of the component graph (each of which corresponding to a strongly connected component of G) in topologically sorted order.
+	\end{enumerate}
+	
+	To understand the algorithm consider following paragraphs from textbook:
+	
+	\paragraph{Lemma 22.13} Let $C$ and $C^\prime$ be distinct strongly connected components in directed graph $G = (V, E)$, let $u, v \in C$, let $u^\prime, v^\prime \in C^\prime$, and suppose that $G$ contains a path $u \rightsquigarrow u^\prime$. Then $G$ cannot also contain a path $v^\prime \rightsquigarrow v$.
+	
+	\paragraph{Definitions}If $U \subseteq V$, then we define $d(U)=\min_{u \in U}\{u.d\}$ and $f(U) = \min_{u \in U}\{u.f\}$. That is, $d(U)$ and $f(U)$ are the earliest discovery time and latest finishing time, respectively, of any vertex in $U$.
+	
+	\paragraph{Lemma 22.14} Let $C$ and $C^\prime$ be distinct strongly connected components in directed graph $G=(V,E)$. Suppose that there is an edge $(u, v) \in E$, where $u \in C$ and $v \in C^\prime$. Then $f(C) > f(C^\prime)$.
+	
+	\paragraph{Corollary 22.15} Let $C$ and $C^\prime$ be distinct strongly connected components in directed graph $G=(V,E)$. Suppose that there is an edge $(u, v) \in E^T$, where $u \in C$ and $v \in C^\prime$. Then $f(C) < f(C^\prime)$. In other words each edge in $G^T$ that goes between different strongly connected components goes from a component with an earlier finishing time (in the first-depth search) to a component with a later finishing time.
+	
+	\paragraph{Understanding strongly connected component algorithm} Let us examine what happens when we perform the second DFS, which is on $G^T$. We start with strongly connected component $C$ whose finishing time $f(C)$ is maximum. The search starts from some vertex $x \in C$, and it visits all vertices in $C$. By Corollary 22.15, $G^T$ contains no edge from $C$ to any other strongly connected component, and so the search from $x$ will not visit vertices in any other component. Thus, the tree rooted at $x$ contains exactly the vertices of $C$. Having completed visiting all vertices in $C$, the search in line 3 (SCC algorithm) selects as a root a vertex from some other strongly connect component $C^\prime$ whose finishing time $f(C^\prime)$ is maximum over all components other than $C$. Again, the search will visit all vertices in $C^\prime$, but by Corollary 22.15, the only edges in $G^T$ from $C^\prime$ to any other component must be to $C$, which we have already visited. In general, when the DFS of $G^T$ in line 3 visits any strongly connected component, any edges out of that component must be to components that the search already visited.Each depth-first tree, therefore, will be exactly one strongly connected component.
+	
 	\chapter{Minimum Spanning Trees}
 	For questions similar to Prim's minimum spanning tree see "Variants" in chapter \ref{psec:ShortestPathClassification}.
 	\section{Problems}
