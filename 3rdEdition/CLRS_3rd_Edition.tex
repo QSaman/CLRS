@@ -1186,6 +1186,72 @@
 	
 	\paragraph{Understanding strongly connected component algorithm} Let us examine what happens when we perform the second DFS, which is on $G^T$. We start with strongly connected component $C$ whose finishing time $f(C)$ is maximum. The search starts from some vertex $x \in C$, and it visits all vertices in $C$. By Corollary 22.15, $G^T$ contains no edge from $C$ to any other strongly connected component, and so the search from $x$ will not visit vertices in any other component. Thus, the tree rooted at $x$ contains exactly the vertices of $C$. Having completed visiting all vertices in $C$, the search in line 3 (SCC algorithm) selects as a root a vertex from some other strongly connect component $C^\prime$ whose finishing time $f(C^\prime)$ is maximum over all components other than $C$. Again, the search will visit all vertices in $C^\prime$, but by Corollary 22.15, the only edges in $G^T$ from $C^\prime$ to any other component must be to $C$, which we have already visited. In general, when the DFS of $G^T$ in line 3 visits any strongly connected component, any edges out of that component must be to components that the search already visited.Each depth-first tree, therefore, will be exactly one strongly connected component.
 	
+	\paragraph{Tricky point} You may think that we can run the second DFS on $G$ instead of $G^T$ and we need to sort vertices in decreasing order of their finishing time. It's not always correct. See exercise 3.
+	
+	\paragraph{Exercise 3}
+	Not always. See the following graph. Suppose in the first DFS we start from $s$, then visit $u$ and finally we visit $v$. In other words, $s.d < u.d < u.f < v.d < v.f < s.f$. So in the second DFS, we start from $u$ and both $s$ and $v$ are reachable from $u$. It means that all $u$ and $s$ and $v$ are in the same component which is wrong.
+	
+	\begin{figure*}[h!]
+		\centering
+		\caption{Counterexample}
+		\begin{tikzpicture}
+		\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+		\tikzset{edge/.style={->, > = latex'}}
+		\tikzset{snake it/.style={-stealth,
+				decoration={snake, 
+					amplitude = 1mm,
+					segment length = 8mm,
+					post length=0.9mm},decorate}}			
+					%vertices
+					\node[vertex] (s) at (4, 0) {$s$};
+					\node[vertex] (u) at (8, 0) {$u$};
+					\node[vertex] (v) at (0, 0) {$v$};
+					%edges
+					\path[edge] (s) edge[snake it, bend left] (u);
+					\path[edge] (u) edge[snake it] (s);
+					\path[edge] (s) edge[snake it] (v);
+					
+					\end{tikzpicture}
+					\end{figure*}	
+	
+	\FloatBarrier
+	
+	\paragraph{Exercise 7}
+	
+	\subparagraph{Wrong idea} Convert the directed graph to an undirected graph and then run a DFS to see if all vertices are reachable from the root of DFS tree. This algorithm doesn't work. This algorithm consider the following graph as a semiconnected graph which is wrong:	
+	
+	\begin{figure*}[h!]
+		\centering
+		\caption{Counterexample}
+		\begin{tikzpicture}
+		\tikzset{vertex/.style={shape = circle, draw, minimum size = 1.5em}}
+		\tikzset{edge/.style={->, > = latex'}}
+		\tikzset{snake it/.style={-stealth,
+				decoration={snake, 
+					amplitude = 1mm,
+					segment length = 8mm,
+					post length=0.9mm},decorate}}			
+					%vertices
+					\node[vertex] (s) at (0, 0) {$s$};
+					\node[vertex] (u) at (4, 0) {$u$};
+					\node[vertex] (v) at (8, 0) {$v$};
+					%edges
+					\draw[edge] (s) -- (u);
+					\draw[edge] (v) -- (u);
+					
+					\end{tikzpicture}
+					\end{figure*}	
+	
+	\FloatBarrier
+	
+	\subparagraph{Answer}
+	\begin{enumerate}
+	\item Call strongly connected components algorithm on $G$.
+	\item Form the component graph (each vertex represent a strongly connected component and each edge connect two different strongly connected components).
+	\item Since component graph is a directed acyclic graph, you can run topological sort on it. Suppose we stored the sorted vertices in the $L = \{v_1, v_2, \dots, v_n\}$.
+	\item Verify there are edges $(v_i, v_{i+1})$ for $i = 1$ to $i = n - 1$.
+	\end{enumerate}
+	
 	\chapter{Minimum Spanning Trees}
 	For questions similar to Prim's minimum spanning tree see "Variants" in chapter \ref{psec:ShortestPathClassification}.
 	\section{Problems}
