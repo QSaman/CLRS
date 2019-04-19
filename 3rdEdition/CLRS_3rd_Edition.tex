@@ -1437,7 +1437,7 @@
 	\begin{enumerate}
 		\item Given unweighted undirected graph $G$ and vertices $s$ and $t$. Find the number of shortest path between $s$ and $t$.
 		\begin{itemize}
-			\item[\textbf{Solution}] It's similar to all-pair shortest path problem but we solve it through Single-source shortest-path problem. Since the graph is unweighted we use BFS. We define a new attirbute $u.num$ which is the number of shortest path from $s$ to $u$. Because the graph is unweighted we only deal with tree and back edges. It is possible a tree edge be another shortest path which we need to consider it.
+			\item[\textbf{Solution}] It's similar to all-pair shortest path problem but we solve it through Single-source shortest-path problem. Since the graph is unweighted we use BFS. We define a new attirbute $u.num$ which is the number of shortest path from $s$ to $u$. Because the graph is unweighted we only deal with tree and cross edges. It is possible a tree edge be another shortest path which we need to consider it.
 			\begin{algorithm*}[h!]
 				\begin{algorithmic}[1]
 					\Function{FIND-SHORTEST-PATH-COUNT}{G, s, t}
@@ -1455,7 +1455,7 @@
 									\State $v.d = u.d + 1$
 									\State $v.num = u.num$
 									\State \Call{ENQUEUE}{G, v}
-								\ElsIf{$u.d + 1 == v.d$} \Comment $(u, v)$ is a back edge
+								\ElsIf{$u.d + 1 == v.d \lor u.d == v.d$} \Comment $(u, v)$ is a cross edge
 									\State $v.num = v.num + u.num$
 								\EndIf
 							\EndFor
