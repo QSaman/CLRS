@@ -728,7 +728,7 @@
 			\item Directed graph
 			\begin{itemize}
 				\item DFS: We can have back edges
-				\item BFS: We can have back edges.
+				\item BFS: We can have back edges. See problem 22-1 from the textbook.
 			\end{itemize}
 			\item Undirected graph
 			\begin{itemize}
@@ -1254,6 +1254,48 @@
 	
 	\chapter{Minimum Spanning Trees}
 	For questions similar to Prim's minimum spanning tree see "Variants" in chapter \ref{psec:ShortestPathClassification}.
+	\section{The algorithms of Kruskal and Prim}
+	For a simple $O(V^2)$ implementation of Prim algorithm see exercise 2.
+	\paragraph{Exercise 2}
+	We add a new variable named $u.MST$ to every vertex of graph. It's a boolean variable. It determines whether or not the vertex belongs to minimum spanning tree. As you can see I didn't use an adjacency matrix. You can easily replace it with adjacency matrix. The running time of this algorithm is $O(V^2)$. To be more specific, finding the minimum safe edge (lines 10-15) takes $O(V^2)$. Updating the keys (lines 17-22) takes no more than the sum of out-degree of each vertex. As we know 
+	\begin{equation*}
+		\sum_{u = \in V} {indegree(u) + outdegree(v)} = 2 \times |E| \le 2 \times |V|^2
+	\end{equation*}
+	So the total running time of this algorithm is $O(V^2 + 2 \times V^2) = O(V^2)$.
+	
+	\begin{algorithm}[h!]
+		\caption{MST-Prim in $O(V^2)$}
+		\begin{algorithmic}[1]
+			\Function{MST-PRIM}{$G,w,r$}
+				\ForAll{$u \in G.V$}
+					\State $u.key = \infty$
+					\State $u.\pi = NIL$
+					\State $u.MST = FALSE$
+				\EndFor
+				\State $r.key = 0$
+				\For {$c = 1$ TO $c = |G.V|$}
+					\State $min = \infty$
+					\ForAll{$w \in G.V$}
+						\If{$w.MST == FALSE \land w.key < min$}
+							\State $min = w.key$
+							\State $u = w$
+						\EndIf
+					\EndFor
+					\State $u.MST = TRUE$
+					\ForAll{$v \in G.adj[u]$}
+						\If{$v.MST == FALSE \land w(u, v) < v.key$}
+							\State $v.\pi = u$
+							\State $v.key = w(u, v)$
+						\EndIf
+					\EndFor
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+		\begin{algorithmic}
+			\Statex
+		\end{algorithmic}	
+	\end{algorithm}
+	\FloatBarrier	
 	\section{Problems}
 	\paragraph{Problem 3 Bottleneck spanning tree}
 	\subparagraph{a.}
