@@ -1255,6 +1255,51 @@
 	\chapter{Minimum Spanning Trees}
 	For questions similar to Prim's minimum spanning tree see "Variants" in chapter \ref{psec:ShortestPathClassification}.
 	\section{The algorithms of Kruskal and Prim}
+	Suppose $L = \{(u_1, v_1), (u_2, v_2), \dots, (u_{|E|}, v_{|E|})\}$ such that $(u_i, v_i) \in E \land (u_{i + 1}, v_{i + 1}) \in E \land w(u_i, v_i) \le w(u_{i + 1}, v_{i + 1})$ for all $1 \le i \le |E| - 1$.
+	
+	\begin{algorithm}[h!]
+		\caption{MST-Kruskal. Depending on data structure can be $O(E\log{V})$}
+		\begin{algorithmic}
+			\Function{MST-PRIM}{$G,w$}
+			\State $A = \emptyset$
+			\ForAll{$v \in G.V$}
+				\State \Call{Make-Set}{$v$}
+			\EndFor
+			\State L = \Call{Create-List-L}{$G, w$} \Comment $O(E\log{E}) = O(E\log{V^2}) = O(E\log{V})$
+			\ForAll{$(u, v) \in L$}
+				\If{\Call{Find-Set}{u} $\ne$ \Call{Find-Set}{v}}
+					\State $A = A \cup \{(u, v)\}$
+					\State \Call{Union}{$u, v$}
+				\EndIf
+			\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm}
+	
+		\begin{algorithm}[h!]
+			\caption{MST-Prim. $O(V\log{V} + E\log{V}) = O(E\log{V})$}
+			\begin{algorithmic}
+				\Function{MST-PRIM}{$G,w,r$}
+					\ForAll{$u \in G.V$}
+						\State $u.key = \infty$
+						\State $u.\pi = NIL$
+					\EndFor
+					\State $r.key = 0$
+					\State $Q = G.V$
+					\While{$Q \ne \emptyset$}
+						\State $u =$\Call{Extract-Min}{Q} \Comment $O(V\log{V})$
+						\ForAll{$v \in G.adj[u]$} \Comment $O(E\log{V})$
+							\If{$v \in Q \land w(u, v) < v.key$}
+								\State $v.\pi = u$
+								\State $v.key = w(u, v)$
+							\EndIf
+						\EndFor
+					\EndWhile
+				\EndFunction
+			\end{algorithmic}
+		\end{algorithm}
+		\FloatBarrier	
+	
 	For a simple $O(V^2)$ implementation of Prim algorithm see exercise 2.
 	\paragraph{Exercise 2}
 	We add a new variable named $u.MST$ to every vertex of graph. It's a boolean variable. It determines whether or not the vertex belongs to minimum spanning tree. As you can see I didn't use an adjacency matrix. You can easily replace it with adjacency matrix. The running time of this algorithm is $O(V^2)$. To be more specific, finding the minimum safe edge (lines 10-15) takes $O(V^2)$. Updating the keys (lines 17-22) takes no more than the sum of out-degree of each vertex. As we know 
@@ -1291,9 +1336,6 @@
 				\EndFor
 			\EndFunction
 		\end{algorithmic}
-		\begin{algorithmic}
-			\Statex
-		\end{algorithmic}	
 	\end{algorithm}
 	\FloatBarrier	
 	\section{Problems}
@@ -1429,6 +1471,223 @@
 	\end{equation*}
 	For the analysis of run-time we assumed $G$ is connected so $|E| \ge |V| - 1$.
 	\chapter{Single-Source Shortest Path}
+	
+	For the following algorithms we are using these functions:
+		\begin{algorithm}[h!]
+			\begin{algorithmic}[1]
+				\Function{Initialize-Single-Source}{$G,s$}
+					\ForAll{$v \in G.V$}
+						\State $v.d = \infty$
+						\State $v.\pi = NIL$
+					\EndFor
+					\State s.d = 0
+				\EndFunction
+			\end{algorithmic}
+			
+			\begin{algorithmic}[1]
+				\Function{Relax}{$u, v, w$}
+					\State relaxed = FALSE
+					\If{$v.d > u.d + w(u, v)$}
+						\State $v.d = u.d + w(u, v)$
+						\State $v.\pi = u$
+						\State relaxed = TRUE
+					\EndIf
+					\State return relaxed
+				\EndFunction
+			\end{algorithmic}			
+		\end{algorithm}		
+	
+	\section{The Bellman-Ford algorithm}		
+		\begin{algorithm}[h!]
+			\caption{Bellman-Ford algorithm which runs in $O(VE)$}
+			\begin{algorithmic}[1]
+				\Function{Bellman-Ford}{$G,w,s$}
+					\State \Call{Initialize-Single-Source}{G,s}
+					\For{$i = 1$ TO $|G.V| - 1$}
+						\State relaxed = FALSE
+						\ForAll{$(u, v) \in G.E$}
+							\State relaxed = \Call{Relax}{u, v, w} $\lor$ relaxed
+						\EndFor
+						\If{$relaxed == FALSE$}
+							\State break
+						\EndIf
+					\EndFor
+					\ForAll{$(u, v) \in G.E$}
+						\If{$v.d > u.d + w(u, v)$}
+							\State return FALSE
+						\EndIf
+					\EndFor
+					\State return TRUE
+				\EndFunction
+			\end{algorithmic}
+		\end{algorithm}
+		\FloatBarrier	
+	\subsection{Exercises}
+	\paragraph{Exercise 3}
+	Since finding all shortest-paths require at most $m$ steps, it is obvious in $(m + 1)$\textsuperscript{th} iteration no $u.d$ will be updated for all $u \in V$.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BELLMAN-FORD2}{G, w, s}
+				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
+					\State $updated = FALSE$
+					\ForAll{edge $(u, v) \in G.E$}
+						\If{\Call{RELAX}{u, v, w} $ == TRUE$}
+							\State $updated = TRUE$
+						\EndIf
+					\EndFor
+					\If{updated $ == FALSE$}
+						\State break
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}
+			\Function{RELAX}{u, v, w}
+				\If{$v.d > u.d + w(u, v)$}
+					\State $v.d = u.d + w(u, v)$
+					\State $v.\pi = u$
+					\State \Return $TRUE$
+				\Else
+					\State \Return $FALSE$
+				\EndIf
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	\paragraph{Exercise 4}
+	When we detect a negative cycle, we need to update $u.d = -\infty$. Then we need to update $d$ attribute for all reachable vertices from $u$ to $-\infty$.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
+				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
+					\ForAll{edge $(u, v) \in G.E$}
+						\State \Call{RELAX}{u, v, w}
+					\EndFor
+				\EndFor
+				\State \Call{INITIALIZE-DFS}{G}
+				\For{each edge $(u, v) \in G.E$}
+					\If{$v.d > u.d + w(u, v)$}
+						\State $v.d = -\infty$
+						\State \Call{DFS}{G, v}
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{DFS}{G, u}
+				\State $u.color = GREY$
+				\ForAll{$v \in G.adj[u]$}
+					\If{$v.color == WHITE$}
+						\State $v.d = -\infty$
+						\State $v.color = GREY$
+						\State \Call{DFS}{G, v}
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	\paragraph{Exercise 5}
+	In the Bellman-Ford algorithm $s.d = 0$ and other vertices have value $\infty$ for their $d$ attribute. If we set $u.d = 0$ for all $u \in V$ we solved this problem. Note that $\delta^*(v) = v.d$.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
+				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+				\ForAll{$u \in G.V$}
+					\State $u.d = 0$
+				\EndFor
+				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
+					\ForAll{edge $(u, v) \in G.E$}
+						\State \Call{RELAX}{u, v, w}
+					\EndFor
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}	
+	\FloatBarrier
+	\paragraph{Exercise 6}
+	We add a new attribute $u.mark$ for avoiding printing vertices in a negative cycle more than once. Suppose $v_0, v_1, \dots, v_k$ are vertices in a negative cycle and $v_0 = v_k$. The Bellman-Ford algorithm expands shortest-path tree in each step. Suppose $v_i.\pi = v_{i - 1}$ for $1 \le i \le k - 1$ and $v_0.\pi = v_k.\pi = u$. Since the cycle is negative, $v_{k - 1}.d + w(k - 1, k) < v_k.d$. So we change the value of $v_k.\pi$ from $u$ to $v_{k - 1}$. In other words, $v_i$ for $0 \le i \le k$ are unreachable from $u$ in shortest-path tree.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
+				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
+					\ForAll{edge $(u, v) \in G.E$}
+						\State \Call{RELAX}{u, v, w}
+					\EndFor
+				\EndFor
+				\ForAll{$u \in G.V$}
+					\State $u.mark = FALSE$
+				\EndFor
+				\For{each edge $(u, v) \in G.E$}
+					\If{$v.d > u.d + w(u, v)$}
+						\State $w = v$
+						\While{$w.mark == FALSE$}
+							\State $w.mark = TRUE$
+							\State \Call{PRINT}{w}
+							\State $w = w.\pi$
+						\EndWhile
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier	
+	\section{Dijkstra's algorithm}
+	For an intuition of Dijkstra shortest path, see figure \ref{fig:dijkstra-shortest-path-algorithm}.
+	\begin{figure}
+	\centering
+	\caption{Dijkstra Shortest Path Algorithm}
+	\label{fig:dijkstra-shortest-path-algorithm}
+	\includegraphics[width=\linewidth]{images/dijkstra-shortest-path.jpg}
+	\end{figure}
+	\subsection{Exercises}
+	\paragraph{Exercise 6}
+	Suppose the path $p = (v_0, v_1, \dots, v_k)$ in which $v_0 = u$ and $v_k = v$ is one of the paths between $u$ and $v$. Since the probabilities are independent we want to find $\max(\prod_{i = 0}^{k - 1}r(v_i, v_{i+1}))$. We can reduce the problem to a shortest-path one by changing the weight function $w(u, v) = r(u, v)$ to $w'(u, v) = -\log{r(u, v)}$.
+	\begin{equation*}
+	\begin{split}
+		0 &\le r(u, v) \le 1 \\
+		\log 0 &\le \log{r(u, v)} \le \log 1
+	\end{split}
+	\end{equation*}
+	If we define $\log 0 = -\infty$, then $-\infty \le \log{r(u, v)} \le 0$ which is equivalent to $0 \le -\log{r(u, v)} \le \infty$.
+	\begin{equation*}
+	\begin{split}
+		\max(\prod_{i = 0}^{k - 1}r(v_i, v_{i+1})) \\
+		&\equiv \max(\sum_{i = 0}^{k - 1}\log{r(v_i, v_{i+1})}) \\
+		&\equiv \min(\sum_{i = 0}^{k - 1}-\log{r(v_i, v_{i+1})})
+	\end{split}
+	\end{equation*}
+	which is exactly the shortest path problem. Since $w'(u, v)$ is non-negative, we can use Dijkstra algorithm which its run-time can be $O(E\log V)$. We only need to change $RELAX$ function.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{$w'$}{u, v, w}
+				\If{$w(u, v) == 0$}
+					\State \Return $\infty$
+				\Else
+					\State \Return $-\log{w(u, v)}$
+				\EndIf
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\begin{algorithm*}
+		\begin{algorithmic}[1]
+			\Function{RELAX}{u, v, w}
+				\If{$v.d > u.d + w'(u, v, w)$}
+					\State $v.d = u.d + w'(u, v, w)$
+					\State $v.\pi = u$
+				\EndIf
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}	
+	\FloatBarrier
+	
 	\phantomsection
 	\label{psec:ShortestPathClassification}	
 	\paragraph{Variants}
@@ -1481,7 +1740,7 @@
 		\begin{enumerate}
 			\item Find a path between $u$ and $v$ which has the maximum $m$ among all possible paths
 			\begin{itemize}
-				\item \textbf{Solution} We can use an algorithm similar to Dijkstra's shortest path for solving this problem
+				\item \textbf{Solution} We can use an algorithm similar to Dijkstra's shortest path for solving this problem. Hint: extract the maximum element from $Q$ in each iteration.
 			\end{itemize}
 			\item Find a path between $u$ and $v$ which has the minimum $M$ among all possible paths
 			\begin{itemize}
@@ -1651,172 +1910,7 @@
 	Many problems for previous sections actually belong here.
 	\item \textbf{All-pair shortest-path problem:}
 	\end{enumerate}
-	\section{The Bellman-Ford algorithm}
-	\subsection{Exercises}
-	\paragraph{Exercise 3}
-	Since finding all shortest-paths require at most $m$ steps, it is obvious in $(m + 1)$\textsuperscript{th} iteration no $u.d$ will be updated for all $u \in V$.
-	\begin{algorithm*}[h!]
-		\begin{algorithmic}[1]
-			\Function{BELLMAN-FORD2}{G, w, s}
-				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
-				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
-					\State $updated = FALSE$
-					\ForAll{edge $(u, v) \in G.E$}
-						\If{\Call{RELAX}{u, v, w} $ == TRUE$}
-							\State $updated = TRUE$
-						\EndIf
-					\EndFor
-					\If{updated $ == FALSE$}
-						\State break
-					\EndIf
-				\EndFor
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm*}
-	\begin{algorithm*}[h!]
-		\begin{algorithmic}
-			\Function{RELAX}{u, v, w}
-				\If{$v.d > u.d + w(u, v)$}
-					\State $v.d = u.d + w(u, v)$
-					\State $v.\pi = u$
-					\State \Return $TRUE$
-				\Else
-					\State \Return $FALSE$
-				\EndIf
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm*}
-	\FloatBarrier
-	\paragraph{Exercise 4}
-	When we detect a negative cycle, we need to update $u.d = -\infty$. Then we need to update $d$ attribute for all reachable vertices from $u$ to $-\infty$.
-	\begin{algorithm*}[h!]
-		\begin{algorithmic}[1]
-			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
-				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
-				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
-					\ForAll{edge $(u, v) \in G.E$}
-						\State \Call{RELAX}{u, v, w}
-					\EndFor
-				\EndFor
-				\State \Call{INITIALIZE-DFS}{G}
-				\For{each edge $(u, v) \in G.E$}
-					\If{$v.d > u.d + w(u, v)$}
-						\State $v.d = -\infty$
-						\State \Call{DFS}{G, v}
-					\EndIf
-				\EndFor
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm*}
-	\begin{algorithm*}[h!]
-		\begin{algorithmic}[1]
-			\Function{DFS}{G, u}
-				\State $u.color = GREY$
-				\ForAll{$v \in G.adj[u]$}
-					\If{$v.color == WHITE$}
-						\State $v.d = -\infty$
-						\State $v.color = GREY$
-						\State \Call{DFS}{G, v}
-					\EndIf
-				\EndFor
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm*}
-	\FloatBarrier
-	\paragraph{Exercise 5}
-	In the Bellman-Ford algorithm $s.d = 0$ and other vertices have value $\infty$ for their $d$ attribute. If we set $u.d = 0$ for all $u \in V$ we solved this problem. Note that $\delta^*(v) = v.d$.
-	\begin{algorithm*}[h!]
-		\begin{algorithmic}[1]
-			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
-				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
-				\ForAll{$u \in G.V$}
-					\State $u.d = 0$
-				\EndFor
-				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
-					\ForAll{edge $(u, v) \in G.E$}
-						\State \Call{RELAX}{u, v, w}
-					\EndFor
-				\EndFor
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm*}	
-	\FloatBarrier
-	\paragraph{Exercise 6}
-	We add a new attribute $u.mark$ for avoiding printing vertices in a negative cycle more than once. Suppose $v_0, v_1, \dots, v_k$ are vertices in a negative cycle and $v_0 = v_k$. The Bellman-Ford algorithm expands shortest-path tree in each step. Suppose $v_i.\pi = v_{i - 1}$ for $1 \le i \le k - 1$ and $v_0.\pi = v_k.\pi = u$. Since the cycle is negative, $v_{k - 1}.d + w(k - 1, k) < v_k.d$. So we change the value of $v_k.\pi$ from $u$ to $v_{k - 1}$. In other words, $v_i$ for $0 \le i \le k$ are unreachable from $u$ in shortest-path tree.
-	\begin{algorithm*}[h!]
-		\begin{algorithmic}[1]
-			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
-				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
-				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
-					\ForAll{edge $(u, v) \in G.E$}
-						\State \Call{RELAX}{u, v, w}
-					\EndFor
-				\EndFor
-				\ForAll{$u \in G.V$}
-					\State $u.mark = FALSE$
-				\EndFor
-				\For{each edge $(u, v) \in G.E$}
-					\If{$v.d > u.d + w(u, v)$}
-						\State $w = v$
-						\While{$w.mark == FALSE$}
-							\State $w.mark = TRUE$
-							\State \Call{PRINT}{w}
-							\State $w = w.\pi$
-						\EndWhile
-					\EndIf
-				\EndFor
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm*}
-	\FloatBarrier	
-	\section{Dijkstra's algorithm}
-	For an intuition of Dijkstra shortest path, see figure \ref{fig:dijkstra-shortest-path-algorithm}.
-	\begin{figure}
-	\centering
-	\caption{Dijkstra Shortest Path Algorithm}
-	\label{fig:dijkstra-shortest-path-algorithm}
-	\includegraphics[width=\linewidth]{images/dijkstra-shortest-path.jpg}
-	\end{figure}
-	\subsection{Exercises}
-	\paragraph{Exercise 6}
-	Suppose the path $p = (v_0, v_1, \dots, v_k)$ in which $v_0 = u$ and $v_k = v$ is one of the paths between $u$ and $v$. Since the probabilities are independent we want to find $\max(\prod_{i = 0}^{k - 1}r(v_i, v_{i+1}))$. We can reduce the problem to a shortest-path one by changing the weight function $w(u, v) = r(u, v)$ to $w'(u, v) = -\log{r(u, v)}$.
-	\begin{equation*}
-	\begin{split}
-		0 &\le r(u, v) \le 1 \\
-		\log 0 &\le \log{r(u, v)} \le \log 1
-	\end{split}
-	\end{equation*}
-	If we define $\log 0 = -\infty$, then $-\infty \le \log{r(u, v)} \le 0$ which is equivalent to $0 \le -\log{r(u, v)} \le \infty$.
-	\begin{equation*}
-	\begin{split}
-		\max(\prod_{i = 0}^{k - 1}r(v_i, v_{i+1})) \\
-		&\equiv \max(\sum_{i = 0}^{k - 1}\log{r(v_i, v_{i+1})}) \\
-		&\equiv \min(\sum_{i = 0}^{k - 1}-\log{r(v_i, v_{i+1})})
-	\end{split}
-	\end{equation*}
-	which is exactly the shortest path problem. Since $w'(u, v)$ is non-negative, we can use Dijkstra algorithm which its run-time can be $O(E\log V)$. We only need to change $RELAX$ function.
-	\begin{algorithm*}[h!]
-		\begin{algorithmic}[1]
-			\Function{$w'$}{u, v, w}
-				\If{$w(u, v) == 0$}
-					\State \Return $\infty$
-				\Else
-					\State \Return $-\log{w(u, v)}$
-				\EndIf
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm*}
-	\begin{algorithm*}
-		\begin{algorithmic}[1]
-			\Function{RELAX}{u, v, w}
-				\If{$v.d > u.d + w'(u, v, w)$}
-					\State $v.d = u.d + w'(u, v, w)$
-					\State $v.\pi = u$
-				\EndIf
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm*}	
-	\FloatBarrier
+	
 	\chapter{All-Pairs Shortest Path}
 	\section{The Floyd-Warshall algorithm}
 	\paragraph{Transitive closure of a directed graph}
@@ -1856,6 +1950,7 @@
 			\end{algorithm*}
 		\end{itemize}
 	\end{enumerate}
+		
 	\chapter{Maximum Flow}
 	\chapter{Flow networks}
 	\section{The Ford-Fulkerson method}
