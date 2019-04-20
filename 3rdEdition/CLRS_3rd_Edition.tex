@@ -1972,7 +1972,62 @@
 	
 	\chapter{All-Pairs Shortest Path}
 	For an alternative solution see exercise 5 of Bellman-Ford algorithm.
+	\paragraph{Weight definition} We assume that the vertices are numbered $1, 2, \dots, |V|$, so that the input is an $n \times n$ matrix $W$ representing the edge weights of an n-vertex directed graph $G = (V, E)$. That is, $W = (w_{ij})$. Suppose $w(i, j)$ is the weight of directed edge $(i, j)$ in which $(i, j) \in E$. We define $w_{ij}$ as:
+	\begin{equation*}
+		w_{ij} = \begin{cases}
+			0 & i = j \\
+			w(i, j) & i \ne j \land (i, j) \in E \\
+			\infty & i \ne j \land (i, j) \notin E
+		\end{cases}
+	\end{equation*}
 	\section{The Floyd-Warshall algorithm}
+	Let $d_{ij}^{(k)}$ be the weight of a shortest path from vertex $i$ to vertex $j$ for which all intermediate vertices are in the set $\{1, 2, \dots, k\}$:
+	\begin{equation*}
+	d_{ij}^{(k)} = \begin{cases}
+		w_{ij} & k = 0 \\
+		\min(d_{ij}^{(k - 1)}, d_{ik}^{(k - 1)} + d_{kj}^{(k - 1)}) & k \ge 1
+	\end{cases}
+	\end{equation*}
+	Because for any path, all intermediate vertices are in the set $\{1, 2, \dots, n\}$, the matrix $D^{(n)} = (d_{ij}^{(n)})$ gives the final answer: $d_{ij}^{(n)} = \delta(i, j)$ for all $i, j \in V$.
+	
+		\begin{algorithm*}[h!]
+			\begin{algorithmic}[1]
+				\Function{Floyd-Warshall}{$W$}
+					\State $n = W.rows$
+					\State $D^{(0)} = W$
+					\For{$k = 1$ TO $n$}
+						\State let $D^{(k)} = (d_{ij}^{(k)})$ be a new $n \times n$ matrix
+						\For{$i = 1$ To $n$}
+							\For{$j = 1$ TO $n$}
+								\State $d_{ij}^{(k)} = \min(d_{ij}^{(k - 1)}, d_{ik}^{(k - 1)} + d_{kj}^{(k - 1)})$
+							\EndFor
+						\EndFor
+					\EndFor
+				\EndFunction
+			\end{algorithmic}
+		\end{algorithm*}
+		\FloatBarrier
+	As you can see $d_{ij}^{(k)}$ is a 3-dimensional array. We can use a 2D array. We assumed $D_{ij}$ has the correct answer for intermediate vertices $1, 2, \dots, k - 1$. Now we want to add vertex $k$ as a new intermediate vertex:
+
+		\begin{algorithm*}[h!]
+			\begin{algorithmic}[1]
+				\Function{Floyd-Warshall}{$W$}
+					\State $n = W.rows$
+					\State $D = W$
+					\For{$k = 1$ TO $n$}
+						\For{$i = 1$ To $n$}
+							\For{$j = 1$ TO $n$}
+								\If{$D_{ik} + D_{kj} < D_{ij}$}
+									\State $D_{ij} = D_{ik} + D_{kj}$
+								\EndIf
+							\EndFor
+						\EndFor
+					\EndFor
+				\EndFunction
+			\end{algorithmic}
+		\end{algorithm*}
+		\FloatBarrier	
+	
 	\paragraph{Transitive closure of a directed graph}
 	\begin{enumerate}
 		\item Given a directed graph G. Design an algorithm to determine whether or not there is at least one cycle. See TopCoder SRM 705 DIV 2 question 500.
