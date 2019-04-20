@@ -1594,21 +1594,37 @@
 	\end{algorithm*}
 	\FloatBarrier
 	\paragraph{Exercise 5}
-	In the Bellman-Ford algorithm $s.d = 0$ and other vertices have value $\infty$ for their $d$ attribute. If we set $u.d = 0$ for all $u \in V$ we solved this problem. Note that $\delta^*(v) = v.d$.
+	We need to modify $Relax$ function:
 	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
-			\Function{BELLMAN-FORD-MODIFIED}{G, w, s}
-				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
-				\ForAll{$u \in G.V$}
-					\State $u.d = 0$
-				\EndFor
-				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
-					\ForAll{edge $(u, v) \in G.E$}
-						\State \Call{RELAX}{u, v, w}
-					\EndFor
-				\EndFor
+			\Function{Relax}{G, w, u, v}
+				\If{$v.d > \min(w(u, v), u.d + w(u, v))$}
+					\State $v.d = \min(w(u, v), u.d + w(u, v))$
+					\State $v.\pi = u$
+				\EndIf
 			\EndFunction
 		\end{algorithmic}
+
+		\begin{algorithmic}[1]
+			\Function{Bellman-Ford}{$G,w,s$}
+				\State \Call{Initialize-Single-Source}{G,s}
+				\For{$i = 1$ TO $|G.V| - 1$}
+					\State relaxed = FALSE
+					\ForAll{$(u, v) \in G.E$}
+						\State relaxed = \Call{Relax}{u, v, w} $\lor$ relaxed
+					\EndFor
+					\If{$relaxed == FALSE$}
+						\State break
+					\EndIf
+				\EndFor
+				\ForAll{$(u, v) \in G.E$}
+					\If{$v.d > u.d + w(u, v)$}
+						\State return FALSE
+					\EndIf
+				\EndFor
+				\State return TRUE
+			\EndFunction
+		\end{algorithmic}		
 	\end{algorithm*}	
 	\FloatBarrier
 	\paragraph{Exercise 6}
@@ -1641,12 +1657,55 @@
 	\FloatBarrier	
 	\section{Dijkstra's algorithm}
 	For an intuition of Dijkstra shortest path, see figure \ref{fig:dijkstra-shortest-path-algorithm}.
+	
+	
+		\begin{algorithm*}[h!]
+			\begin{algorithmic}[1]
+				\Function{Initialize-Single-Source}{$G,s$}
+					\ForAll{$v \in G.V$}
+						\State $v.d = \infty$
+						\State $v.\pi = NIL$
+					\EndFor
+					\State s.d = 0
+				\EndFunction
+			\end{algorithmic}
+			
+			\begin{algorithmic}[1]
+				\Function{Relax}{$u, v, w$}
+					\State relaxed = FALSE
+					\If{$v.d > u.d + w(u, v)$}
+						\State $v.d = u.d + w(u, v)$
+						\State $v.\pi = u$
+						\State relaxed = TRUE
+					\EndIf
+					\State return relaxed
+				\EndFunction
+			\end{algorithmic}
+	
+			\begin{algorithmic}[1]
+				\Function{Dijkstra}{$G,w,s$}
+					\State \Call{Initialize-Single-Source}{G,s}
+					\State $S = \emptyset$
+					\State $Q = G.V$
+					\While{$Q \ne \emptyset$}
+						\State $u=$ \Call{Extract-Min}{Q}
+						\State $S = S \cup \{u\}$
+						\ForAll{$v \in G.adv[u]$}
+							\State \Call{Relax}{u, v, w}
+						\EndFor
+					\EndWhile
+				\EndFunction
+			\end{algorithmic}		
+		\end{algorithm*}
+		\FloatBarrier
+	
 	\begin{figure}
 	\centering
 	\caption{Dijkstra Shortest Path Algorithm}
 	\label{fig:dijkstra-shortest-path-algorithm}
 	\includegraphics[width=\linewidth]{images/dijkstra-shortest-path.jpg}
 	\end{figure}
+	\FloatBarrier
 	\subsection{Exercises}
 	\paragraph{Exercise 6}
 	Suppose the path $p = (v_0, v_1, \dots, v_k)$ in which $v_0 = u$ and $v_k = v$ is one of the paths between $u$ and $v$. Since the probabilities are independent we want to find $\max(\prod_{i = 0}^{k - 1}r(v_i, v_{i+1}))$. We can reduce the problem to a shortest-path one by changing the weight function $w(u, v) = r(u, v)$ to $w'(u, v) = -\log{r(u, v)}$.
@@ -1912,6 +1971,7 @@
 	\end{enumerate}
 	
 	\chapter{All-Pairs Shortest Path}
+	For an alternative solution see exercise 5 of Bellman-Ford algorithm.
 	\section{The Floyd-Warshall algorithm}
 	\paragraph{Transitive closure of a directed graph}
 	\begin{enumerate}
