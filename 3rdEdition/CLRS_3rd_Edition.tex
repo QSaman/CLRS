@@ -2080,7 +2080,7 @@
 	0 & \text{otherwise}
 	\end{cases}
 	\end{equation}
-	Since antiparallel edges are not allowed, it is impossible that we have $(u, v) \in E \land (v, u) \in E$. So the definition of residual capacities is well defined. Given a flow network $G = (V, E)$ and a flow $f$, the \textbf{residula network} of $G$ induced by $f$ is $G_f = (V, E_f)$, where $E_f = \{(u, v) \in V \times V : c_f(u, v) > 0\}$.\\
+	Since antiparallel edges are not allowed, it is impossible that we have $(u, v) \in E \land (v, u) \in E$. So the definition of residual capacities is well defined. Given a flow network $G = (V, E)$ and a flow $f$, the \textbf{residual network} of $G$ induced by $f$ is $G_f = (V, E_f)$, where $E_f = \{(u, v) \in V \times V : c_f(u, v) > 0\}$.\\
 	Now we need to deal with the flow of edges. If $f$ is a flow in $G$ and $f'$ is a flow in the corresponding residual network $G_f$, we define $f \uparrow f'$, the \textbf{augmentation} of flow $f$ by $f'$, to be a function from $V \times V$ to $\mathbb{R}$, defined by
 	\begin{equation}
 	\label{eq:augmentationOfFlowNoAntiparallel}
@@ -2140,6 +2140,8 @@
 	\begin{equation}
 		f_i(u, v) = -f_i(v, u)
 	\end{equation}
+	\paragraph{Minimum cut}
+	A minimum cut of a network is a cut whose capacity is minimum over all cuts of the network. Since we must respect the capacity of each edge when we calculating maximum flow, intuitively we calculated minimum cut. 
 	\paragraph{Minimum cut properties}
 	Suppose we have a flow network with maximum flow. Consider the final residual network $G_f$. Obviously we shouldn't have any augmenting path from $s$ to $t$.
 	\begin{itemize}
