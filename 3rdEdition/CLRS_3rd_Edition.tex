@@ -33,7 +33,19 @@
 	\tableofcontents
 	\mainmatter
 	\chapter{Dynamic Programming}
-	\section{Rod cutting}	
+	\section{Rod cutting}
+	\paragraph{Proof of the number of cuts}
+	Imagine for the rod of size $n$ we have $n$ cuts of length $1$. We assign numbers $1, 2, \dots, n$ to these cuts of length $1$. For $n = 3$ we can have
+	\begin{table}[H]
+		\centering
+		\begin{tabular}{r c c c c c}
+			1: & 1 & * & 2 & * & 3 \\
+			2: & 1 & * & 2 & & 3 \\
+			3: & 1 &  & 2 & * & 3 \\
+			4: & 1 & & 2 &  & 3 \\
+		\end{tabular}
+	\end{table}
+	So for a rod of length $n$ we can have at most $n-1$ stars (cuts). Each of these stars can appear or disappear. So the number of ways to cut the rod is $2^{n - 1}$.
 	\paragraph{Exercise 2}
 	No it cannot always produce an optimal solution. Consider the following example.
 	\begin{table}[H]
