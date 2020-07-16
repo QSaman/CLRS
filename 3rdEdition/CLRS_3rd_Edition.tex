@@ -246,18 +246,18 @@
 	\begin{enumerate}
 		\item[] $\boldsymbol{in_u:}$ The number of edges that enter $u$
 		\item[] $\boldsymbol{out_u:}$ The number of edges that leave $u$
-		\item[] $\boldsymbol{e_u:}$ And edge from u to an arbitrary vertex $v \ne u$
+		\item[] $\boldsymbol{(u, v):}$ And edge from u to v $v \ne u$
 	\end{enumerate}
-	We assign to all $e_u$ cost $c_{e_u} = 1 + in_u$. Because by traversing the graph, we visit $e_u$ at least once (line \ref{MakeSquareGraph:1-path}). For each edge that enters $u$ we visit or revisit $e_u$ (lines \ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2}). We know that $\sum_{u = 1}^{|V|}{in_u} + \sum_{u = 1}^{|V|}{out_u} = 2|E|$. So we can easily calculate the total cost.
+	We assign to each edge (u, v) cost $c_{(u, v)} = 1 + in_u$. Because by traversing all vertices (line \ref{MakeSquareGraph:all_verticies}), we finally visit $u$ and  then visit (u, v) in line \ref{MakeSquareGraph:1-path} which occurs exactly 1 time. For each edge that enters $u$ we \textbf{revisit} edge (u, v) (lines \ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2}). We know that $\sum_{u \in V}{in_u} + \sum_{u \in V}{out_u} = 2|E|$. So we can easily calculate the total cost.
 	\begin{equation*}
 		\begin{split}
-		\sum_{e_u \in E}{c_{e_u}} &= \sum_{e_u \in E}{1 + in_u} \\
-		&= \sum_{e_u \in E}{1} + \sum_{u = 1}^{|V|}{in_u} \\
-		&= |E| + \sum_{u = 1}^{|V|}{in_u} \\
-		&\le 3|E|
+		\sum_{(u, v) \in E}{c_{(u, v)}} &= \sum_{(u, v) \in E}{1 + in_u} \\
+		&= \sum_{(u, v) \in E}{1} + \sum_{(u, v) \in E}{in_u} \\
+		&\le |E| + |E| \times \sum_{u \in V}{in_u} \\
+		&\le 4|E|
 		\end{split}
 	\end{equation*}
-	We execute line \ref{MakeSquareGraph:1-path} at most $|E|$ times and lines \ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2} at most $2|E|$ times. So the total running time of algorithm using adjacency-list is $O(|V| + 3|E|) = O(V + E)$.
+	We execute line \ref{MakeSquareGraph:1-path} at most $|E|$ times and lines \ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2} at most $3|E|$ times. So the total running time of algorithm using adjacency-list is $O(|V| + 4|E|) = O(V + E)$.
 	\begin{algorithm*}[h!]
 		\caption{Finding square graph using matrix-list}
 		\begin{algorithmic}[1]
@@ -286,12 +286,15 @@
 				\State Let $G'$	be a new graph
 				\State $G'.V = G.V$
 				\ForAll{$u \in G.V$}
+				   \label{MakeSquareGraph:all_verticies}
 					\ForAll{$v \in G.Adj[u]$}
 						\State $G'.Adj[u].insert(v)$ \label{MakeSquareGraph:1-path}
 						\Comment 1-edge paths
-						\ForAll{$w \in G.Adj[v]$} \label{MakeSquareGraph:2-path:1}
+						\ForAll{$w \in G.Adj[v]$}		\label{MakeSquareGraph:2-path:1}
+						\If {$w \notin G'.Adj[u]$}
 							\State $G'.Adj[u].insert(w)$ \label{MakeSquareGraph:2-path:2}
 							\Comment 2-edge paths
+						\EndIf
 						\EndFor						
 					\EndFor
 				\EndFor
