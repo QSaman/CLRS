@@ -244,11 +244,12 @@
 	\paragraph{Exercise 5}
 	The running time of matrix-list implementation is $O(V^3)$. For analyzing the running time of adjacency-list implementation we can use amortized analysis.
 	\begin{enumerate}
-		\item[] $\boldsymbol{in_u:}$ The number of edges that enter $u$
-		\item[] $\boldsymbol{out_u:}$ The number of edges that leave $u$
-		\item[] $\boldsymbol{(u, v):}$ And edge from u to v $v \ne u$
-		\item[] $\boldsymbol{c_u:}$ The number of times we visit vertex $u$ with at most one edge
-		\item[] $\boldsymbol{c_{(u, v)}:}$ The number of times we visit vertex $v$ with exactly two edges $(x_i, u)$ and $(u, v)$ in which $x_i \in in_u$.
+		\item $\boldsymbol{in_u:}$ The number of edges that enter $u$
+		\item $\boldsymbol{out_u:}$ The number of edges that leave $u$
+		\item $\boldsymbol{(u, v):}$ And edge from u to v $v \ne u$
+		\item $\boldsymbol{c_u:}$ The number of times we visit vertex $u$ with at most one edge
+		\item $\boldsymbol{c_{(u, v)}:}$ The number of times we visit vertex $v$ with exactly two edges $(x_i, u)$ and $(u, v)$ in which $x_i \in in_u$.
+		\item So we visit each vertex $u$ no more than $c_u + \sum_{x \in in_u} {c_{(x, u)}}$.
 	\end{enumerate}
 	We assign to each vertex $u$ cost $c_u = 1 + in_u$. $1$ is for line \ref{MakeSquareGraph:all_verticies} and $in_u$ is for line \ref{MakeSquareGraph:1-path}. For lines (\ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2}) we assign to each edge cost $c_{(u, v)} = in_u$. So the running time of algorithm, the total number of times we visit each vertex, is $\sum_{u \in V} c_u + \sum_{(u, v) \in E}{c_{(u, v)}}$. We calculate each of them separately. We know the following facts:
 	\begin{equation*}
