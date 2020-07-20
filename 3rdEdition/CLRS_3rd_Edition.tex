@@ -242,22 +242,39 @@
 		\end{algorithmic}
 	\end{algorithm}
 	\paragraph{Exercise 5}
-	The running time of matrix-list implementation is $O(V^3)$. For analyzing the running time of adjacency-list implementation we can use amortized analysis. We use "accountant method".
+	The running time of matrix-list implementation is $O(V^3)$. For analyzing the running time of adjacency-list implementation we can use amortized analysis.
 	\begin{enumerate}
 		\item[] $\boldsymbol{in_u:}$ The number of edges that enter $u$
 		\item[] $\boldsymbol{out_u:}$ The number of edges that leave $u$
 		\item[] $\boldsymbol{(u, v):}$ And edge from u to v $v \ne u$
+		\item[] $\boldsymbol{c_u:}$ The number of times we visit vertex $u$ with at most one edge
+		\item[] $\boldsymbol{c_{(u, v)}:}$ The number of times we visit vertex $v$ with exactly two edges $(x_i, u)$ and $(u, v)$ in which $x_i \in in_u$.
 	\end{enumerate}
-	We assign to each edge (u, v) cost $c_{(u, v)} = 1 + in_u$. Because by traversing all vertices (line \ref{MakeSquareGraph:all_verticies}), we finally visit $u$ and  then visit (u, v) in line \ref{MakeSquareGraph:1-path} which occurs exactly 1 time. For each edge that enters $u$ we \textbf{revisit} edge (u, v) (lines \ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2}). We know that $\sum_{u \in V}{in_u} + \sum_{u \in V}{out_u} = 2|E|$. So we can easily calculate the total cost.
+	We assign to each vertex $u$ cost $c_u = 1 + in_u$. $1$ is for line \ref{MakeSquareGraph:all_verticies} and $in_u$ is for line \ref{MakeSquareGraph:1-path}. For lines (\ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2}) we assign to each edge cost $c_{(u, v)} = in_u$. So the running time of algorithm, the total number of times we visit each vertex, is $\sum_{u \in V} c_u + \sum_{(u, v) \in E}{c_{(u, v)}}$. We calculate each of them separately. We know the following facts:
+	\begin{equation*}
+	\begin{split}
+		\sum_{u \in V}{in_u} &= |E| \\
+		\sum_{u \in V}{out_u} &= |E| \\
+		\sum_{(u,v) \in E} {in_u} &\le \sum_{u \in V} {in_u}
+	\end{split}	
+	\end{equation*}
+	Note that $\sum_{(u,v) \in E} {in_u} \le \sum_{u \in V} {in_u}$ is correct because there maybe at least one vertex $u$ in which $in_u >0 \land out_u = 0$.
 	\begin{equation*}
 		\begin{split}
-		\sum_{(u, v) \in E}{c_{(u, v)}} &= \sum_{(u, v) \in E}{1 + in_u} \\
-		&= \sum_{(u, v) \in E}{1} + \sum_{(u, v) \in E}{in_u} \\
-		&\le |E| + |E| \times \sum_{u \in V}{in_u} \\
-		&\le 4|E|
+		\sum_{u \in V}{c_{u}} &= \sum_{u \in V}{1 + in_u} \\
+		&= \sum_{u \in V}{1} + \sum_{u \in V}{in_u} \\
+		&= |V| + |E|
 		\end{split}
 	\end{equation*}
-	We execute line \ref{MakeSquareGraph:1-path} at most $|E|$ times and lines \ref{MakeSquareGraph:2-path:1} - \ref{MakeSquareGraph:2-path:2} at most $3|E|$ times. So the total running time of algorithm using adjacency-list is $O(|V| + 4|E|) = O(V + E)$.
+	and for the last part:
+	\begin{equation*}
+		\begin{split}
+		\sum_{(u, v) \in E}{c_{(u, v)}}  &= \sum_{(u, v) \in E}{in_u} \\
+		&\le \sum_{u \in V}{in_u} \\
+		&= |E|
+		\end{split}
+	\end{equation*}
+	So the running time of algorithm is $O(|V| + |E| + |E|) = O(|V| + |E|)$.
 	\begin{algorithm*}[h!]
 		\caption{Finding square graph using matrix-list}
 		\begin{algorithmic}[1]
