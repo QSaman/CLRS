@@ -242,7 +242,17 @@
 		\end{algorithmic}
 	\end{algorithm}
 	\paragraph{Exercise 5}
-	The running time of matrix-list implementation is $O(V^3)$. For analyzing the running time of adjacency-list implementation we can use amortized analysis.
+	The running time of matrix-list implementation is $O(V^3)$. Note that having matrix-list named $A$:
+	
+	\begin{equation*}
+	A^2 = A_{|V| \times |V|} \times A_{|V| \times |V|}
+	\end{equation*}
+	Suppose $a_{ij} \in A$ and $a^2_{ij} \in A^2$ and $a_{ii} = 0$:
+	\begin{equation*}
+	a^2_{ij} = \sum_{k = 1}^{|V|}{a_{ik} \times a_{kj}}
+	\end{equation*}
+	So if $a^2_{ij} > 0$ there is a path with at most 2 edges between $i$ and $j$. So we can use Strassen multiplication algorithm in $O(n^{2.807})$. But here we use $O(V^3)$ straightforward algorithm.
+	 \par For analyzing the running time of adjacency-list implementation we can use amortized analysis.
 	\begin{enumerate}
 		\item $\boldsymbol{in_u:}$ The number of edges that enter $u$
 		\item $\boldsymbol{out_u:}$ The number of edges that leave $u$
@@ -256,10 +266,12 @@
 	\begin{split}
 		\sum_{u \in V}{in_u} &= |E| \\
 		\sum_{u \in V}{out_u} &= |E| \\
-		\sum_{(u,v) \in E} {in_u} &\le \sum_{u \in V} {in_u}
+		\sum_{(u, v) \in E}{in_u} &= \sum_{u \in V}{in_u \times out_u} \\
+		\sum_{(u, v) \in E}{in_u} &\le \sum_{(u, v) \in E}{|V| - 1} \\
+		&= |E| \times (|V| - 1)
 	\end{split}	
 	\end{equation*}
-	Note that $\sum_{(u,v) \in E} {in_u} \le \sum_{u \in V} {in_u}$ is correct because there maybe at least one vertex $u$ in which $in_u >0 \land out_u = 0$.
+	So we calculate each of the costs separately:
 	\begin{equation*}
 		\begin{split}
 		\sum_{u \in V}{c_{u}} &= \sum_{u \in V}{1 + in_u} \\
@@ -271,11 +283,11 @@
 	\begin{equation*}
 		\begin{split}
 		\sum_{(u, v) \in E}{c_{(u, v)}}  &= \sum_{(u, v) \in E}{in_u} \\
-		&\le \sum_{u \in V}{in_u} \\
-		&= |E|
+		&\le \sum_{(u, v) \in E}{|V|} \\
+		&= |V| \times |E|
 		\end{split}
 	\end{equation*}
-	So the running time of algorithm is $O(|V| + |E| + |E|) = O(|V| + |E|)$.
+	So the running time of algorithm is $O(|V| + |E| + |V| \times |E|) = O(|V| + |E| \times (1 + |V|)) = O(|V| + |V| \times |E|) = O(|V| \times (1 + |E|)) = O(|V| \times |E|)$.
 	\begin{algorithm*}[h!]
 		\caption{Finding square graph using matrix-list}
 		\begin{algorithmic}[1]
