@@ -247,11 +247,11 @@
 	\begin{equation*}
 	A^2 = A_{|V| \times |V|} \times A_{|V| \times |V|}
 	\end{equation*}
-	Suppose $a_{ij} \in A$ and $a^2_{ij} \in A^2$ and $a_{ii} = 0$:
+	Suppose $a_{ij} \in A$ and $a^2_{ij} \in A^2$ and $a_{ii} = 1$:
 	\begin{equation*}
 	a^2_{ij} = \sum_{k = 1}^{|V|}{a_{ik} \times a_{kj}}
 	\end{equation*}
-	So if $a^2_{ij} > 0$ there is a path with at most 2 edges between $i$ and $j$. So we can use Strassen multiplication algorithm in $O(n^{2.807})$. But here we use $O(V^3)$ straightforward algorithm.
+	So if $a^2_{ij} > 0$ there is at least one path with at most 2 edges between $i$ and $j$. So we can use Strassen multiplication algorithm in $O(n^{2.807})$. But here we use $O(V^3)$ straightforward algorithm.
 	 \par For analyzing the running time of adjacency-list implementation we can use amortized analysis.
 	\begin{enumerate}
 		\item $\boldsymbol{in_u:}$ The number of edges that enter $u$
