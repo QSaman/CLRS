@@ -374,11 +374,11 @@
 	\end{algorithm*}
 	\FloatBarrier
 	\paragraph{Exercise 7}
-	We know that $B$ is an $V \times E$ matrix which we show it as $B_{V \times E}$. By definition $B^T$ is an $E \times V$ matrix which we show it as $B_{E \times V}^T$. We define $P_{V \times V} = B_{V \times E} \times B_{E \times V}^T$.
+	We know that $B$ is an $|V| \times |E|$ matrix which we show it as $B_{|V| \times |E|}$. By definition $B^T$ is an $|E| \times |V|$ matrix which we show it as $B_{|E| \times |V|}^T$. We define $P_{|V| \times |V|} = B_{|V| \times |E|} \times B_{|E| \times |V|}^T$.
 	\begin{equation*}	
 	\begin{split}
-		p[i, j] &= \sum_{k = 1}^{|E|}b[i, k] \times b^T[k, j] \\
-		&= \sum_{k = 1}^{|E|}b[i, k] \times b[j, k]
+		p_{ij} &= \sum_{e \in E}b_{ie} \times b^T_{ej} \\
+		&= \sum_{e \in E}b_{ie} \times b_{je}
 	\end{split}
 	\end{equation*}
 	
@@ -386,31 +386,31 @@
 	\begin{enumerate}
 		\item $\boldsymbol{i \ne j:}$
 			\begin{equation*}
-			b[i, k] \times b[j, k] = \begin{cases}
-			-1 \times 1 & k = (i, j) \in E \\
-			1 \times -1 & k = (j, i) \in E \\
-			0 & k = (u, v) \in E \land (u \ne i \lor v \ne j)
+			b_{ie} \times b_{je} = \begin{cases}
+			-1 \times 1 & e = (i, j) \in E \\
+			1 \times -1 & e = (j, i) \in E \\
+			0 & otherwise
 			\end{cases}
 			\end{equation*}
 			
-			So $p[i, j]$ is the number of edges between $i$ and $j$.
+			So $p_{ij}$ is the number of edges between $i$ and $j$.
 			
 		\item $\boldsymbol{i = j:}$
 		
 			\begin{equation*}
-			b[i, k] \times b[j, k] = b[i, k] \times b[i, k] = \begin{cases}
-			-1 \times -1 & k = (i, u) \in E \\
-			1 \times 1 & k = (u, i) \in E \\
-			0 \times 0 & k = (u, v) \in E \land (u \ne i \land v \ne i)
+			b_{ie} \times b_{je} = b_{ie} \times b_{ie} = \begin{cases}
+			-1 \times -1 & e = (i, j) \in E \land j \ne i \\
+			1 \times 1 & e = (j, i) \in E \land j \ne i \\
+			0 \times 0 & otherwise
 			\end{cases}
 			\end{equation*}
 			
-			In this case $p[i, i]$ is the sum of all edges that enter and leave the vertex $i$.		
+			In this case $p_{ii}$ is the sum of all edges that enter and leave the vertex $i$.		
 	\end{enumerate}
 	We can summarize the answer
 	\begin{equation*}
-		p[i, j] = \begin{cases}
-		\text{number of edges between i and j} & i \ne j \\
+		p_{ij} = \begin{cases}
+		-|S| \text{ such as } S = \{e \in E : e = (i, j) \lor e = (j, i)\} & i \ne j \\
 		indegree(i) + outdegree(i) & i = j
 		\end{cases}
 	\end{equation*}
