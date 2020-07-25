@@ -1146,7 +1146,7 @@
 	\subparagraph{Wrong Idea 3}
 	If you google for solution you may find a solution which suggest to run topological sort. This algorithm assumes that we have at least one vertex with indegree zero which is not a correct assumption for singly connected graph.
 	\subparagraph{Correct Answer}
-	Since we don't know on which vertex we must start the DFS algorithm, we run DFS on every vertex $v \in V$. In every run we initialize all vertices attributes (.e.g $v.color = WHITE$). If we encounter forward or cross edges (note that we reset attributes in each run, so the cross edges are only in the same DFS tree and we don't encounter cross edges between two different DFS trees), we know that it's not singly connected. The runtime of this algorithm is $O(V \times (V+E))$.
+	Since we don't know on which vertex we must start the DFS algorithm, we run DFS on every vertex $v \in V$. In every run we initialize all vertices attributes (.e.g $v.color = WHITE$). If we encounter forward or cross edges (note that we reset attributes in each run, so the cross edges are only in the same DFS tree and we don't encounter cross edges between two different DFS trees), we know that it's not singly connected. In each iteration we visit vertices at most $|E| + 1$ times. so the total runtime of this algorithm is $O(V \times (E + 1)) = O(V + VE)$.
 	
 	\section{Topological Sort}
 	\paragraph{Exercise 2}
