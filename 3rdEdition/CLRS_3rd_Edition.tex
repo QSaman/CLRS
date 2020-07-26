@@ -530,9 +530,11 @@
 		\item It's easier to use BFS for finding cycles in undirected graphs which takes $O(V + E)$. If we encounter a cross edge, we have a cycle. If we want a faster approach for undirected graph, we need to use DFS which takes $O(V)$. for more information see exercise 3 of Topological sort. For directed graphs, it's better to use DFS. If we have a back edge, it means we have a cycle. If you want to use DFS for undirected graph see \textbf{Exercise 10 of DFS}.
 	 
 	\end{itemize}
-		
+
+    \phantomsection
+    \label{psec:bfs_exercise_7}
 	\paragraph{Exercise 7}
-	We need to determine whether an undirected graph is bipartite or not. We can paint the vertices of a bipartite graph with two colors in such a way that no two adjacent vertices share the same color.\\
+	For another good example see "Find the number of shortest path between" on \ref{psec:ShortestPathClassification}. We need to determine whether an undirected graph is bipartite or not. We can paint the vertices of a bipartite graph with two colors in such a way that no two adjacent vertices share the same color.\\
 	We can easily prove that if there is a cycle in graph in which the number of edges is odd, then the graph cannot be bipartite. \\
 	We can use BFS. We know that in BFS algorithm we can only have tree and back and cross edges (see \ref{psec:BFSAlgorithm}). Note that in BFS we can have cross edges whether or not the graph is directed. We run BFS on an arbitrary vertex $s$. Suppose $u$ is reachable from $s$. If $u.d$ is even we color that vertex "blue" otherwise we color it "red". For tree edges we don't have any problem. Since in back edges in BFS there is a parent-child relationship between two vertices of an endge, we don't have any problem with back edges. We need to think about cross edges. We know that $\delta(s, u) = u.d$ which is the shortest path from $s$ to $u$. \\
 	
@@ -1654,7 +1656,7 @@
 	\end{algorithm*}
 	\FloatBarrier
 	\paragraph{Exercise 5}
-	We need to modify $Relax$ function:
+	We need to modify $Relax$ function (note that we can have edges with negative weights):
 	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
 			\Function{Relax}{G, w, u, v}
@@ -1815,7 +1817,7 @@
 	\begin{enumerate}
 		\item Given unweighted undirected graph $G$ and vertices $s$ and $t$. Find the number of shortest path between $s$ and $t$.
 		\begin{itemize}
-			\item[\textbf{Solution}] It's similar to all-pair shortest path problem but we solve it through Single-source shortest-path problem. Since the graph is unweighted we use BFS. We define a new attirbute $u.num$ which is the number of shortest path from $s$ to $u$. Because the graph is unweighted we only deal with tree and cross edges. It is possible a tree edge be another shortest path which we need to consider it.
+			\item[\textbf{Solution}] For another example about cross edges in BFS see BFS exercise 7 \ref{psec:bfs_exercise_7}. It's similar to all-pair shortest path problem but we solve it through Single-source shortest-path problem. Since the graph is unweighted we use BFS. We define a new attirbute $u.num$ which is the number of shortest path from $s$ to $u$. Because the graph is unweighted we only deal with tree and cross edges (since it's an undirected graph if $(u, v) \in E$, then $(v, u) \in E$; note that if $(u, v)$ is a tree edge, we need to consider $(v, u)$ also as tree edge). It is possible a tree edge be another shortest path which we need to consider it. Suppose edge $(u, v)$ is a cross edge. According to $d$ property (note that $d$ is distance not discovery time) we know that $u.d + 1 \le v.d$ and $v.d + 1 \le u.d$. So we have $-1 \le u.d - v.d \le 1$. So $u.v - v.d$ can have three values -1, 0, 1. Only if $u.d - v.d = 1$ then $u.d + 1$ is another shortest-path for $v$.
 			\begin{algorithm*}[h!]
 				\begin{algorithmic}[1]
 					\Function{FIND-SHORTEST-PATH-COUNT}{G, s, t}
@@ -1833,7 +1835,7 @@
 									\State $v.d = u.d + 1$
 									\State $v.num = u.num$
 									\State \Call{ENQUEUE}{G, v}
-								\ElsIf{$u.d + 1 == v.d \lor u.d == v.d$} \Comment $(u, v)$ is a cross edge
+								\ElsIf{$u.d + 1 == v.d$}
 									\State $v.num = v.num + u.num$
 								\EndIf
 							\EndFor
