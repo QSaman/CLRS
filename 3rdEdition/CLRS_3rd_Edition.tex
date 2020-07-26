@@ -788,12 +788,12 @@
 			\item Directed graph
 			\begin{itemize}
 				\item DFS: We can have back edges
-				\item BFS: We can have back edges. See problem 22-1 from the textbook.
+				\item BFS: We can have back edges. See problem 22-1 from the textbook. If $(u, v)$ is a back edge, then we have $u.d \ge v.d \ge 0$
 			\end{itemize}
 			\item Undirected graph
 			\begin{itemize}
 				\item DFS: We can have back edges
-				\item BFS: We can have back edges. Suppose $(u, v)$ is a back edge, then $v$ is the parent of $u$ for more information see the beginning of chapter \ref{psec:BFSAlgorithm}.
+				\item BFS: We don't have back edges. Note that since it's undirected graph, if $(u, v)$ is a tree edge, $(v, u) \in E$. So it has back edge properties but we consider it as tree edge.
 			\end{itemize}
 		\end{itemize}
 		\item \textbf{Cross edge}
@@ -801,12 +801,22 @@
 			\item Directed graph
 			\begin{itemize}
 				\item DFS: We can have cross edges
-				\item BFS: We can have cross edges. refer to the beginning of chapter \ref{psec:BFSAlgorithm}. For an example see figure \ref{fig:BfsCrossEdgeDirectedGraph}
+				\item BFS: We can have cross edges. refer to the beginning of chapter \ref{psec:BFSAlgorithm}. For an example see figure \ref{fig:BfsCrossEdgeDirectedGraph}. Suppose that $(u, v)$ is a cross edge. 
+				\par We can only define an upper bound for $v.d$: $v.d \le u.d + 1$. Because if $(u, v) \in E$ then it may be possible that $(v, u) \notin E$.
 			\end{itemize}
 			\item Undirected graph
 			\begin{itemize}
 				\item DFS: We can't have cross edges
 				\item BFS: We can have cross edges. See the beginning of chapter \ref{psec:BFSAlgorithm}.
+				\par Since $(u, v) \in E \land (v, u) \in E$, we can define upper bound for both $v.d$ and $u.d$:
+				\begin{equation*}
+				\begin{split}
+					v.d \le u.d + 1 &\Rightarrow v.d - u.v \le 1 \\
+					&\Rightarrow u.v - v.d \ge -1 \\
+					u.d \le v.d + 1 &\Rightarrow u.d - v.d \le 1 \\
+				\end{split}
+				\end{equation*}
+				So in undirected graphs for cross edge $(u, v)$ we have $-1 \le u.d - v.d \le 1$
 			\end{itemize}
 		\end{itemize}		
 	\end{itemize}
