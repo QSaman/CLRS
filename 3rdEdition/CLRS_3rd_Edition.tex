@@ -800,7 +800,7 @@
 		\begin{itemize}
 			\item Directed graph
 			\begin{itemize}
-				\item DFS: We can have cross edges
+				\item DFS: We can have cross edges. The cross edges can be in the same DFS tree or it can connect two different DFS trees.
 				\item BFS: We can have cross edges. refer to the beginning of chapter \ref{psec:BFSAlgorithm}. For an example see figure \ref{fig:BfsCrossEdgeDirectedGraph}. Suppose that $(u, v)$ is a cross edge. 
 				\par We can only define an upper bound for $v.d$: $v.d \le u.d + 1$. Because if $(u, v) \in E$ then it may be possible that $(v, u) \notin E$.
 			\end{itemize}
