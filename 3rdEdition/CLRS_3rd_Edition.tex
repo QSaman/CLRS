@@ -737,8 +737,9 @@
 	\end{algorithm*}
 	\FloatBarrier
 	\section{Depth-first search}
+	For another example of DFS, See exercise 8 in Floyd-Warshall shortest-path algorithm here \ref{psec:floyd_warshall_exercise_8}.
 	\phantomsection
-	\label{psec:EdgeClassification}
+	\label{psec:EdgeClassification}	
 	\paragraph{Edge classification}
 	\begin{itemize}
 	\item[\textbf{Tree edges}] are edges in the depth-first forest $G_\pi$. Edge $(u, v)$ is a tree edge if v was discovered by exploring edge $(u, v)$
@@ -1570,7 +1571,8 @@
 		\end{algorithm}		
 	
 	\section{The Bellman-Ford algorithm}
-		There is also similarity between Bellman-Ford and Floyd-Warshall algorithm.		
+		There is also similarity between Bellman-Ford and Floyd-Warshall algorithm.
+		\par In Bellman-Ford algorithm we know that a shortest path between $u$ and $v$ has at most $|V| - 1$ edges. So we relax all edges at most $|V| - 1$ times. On the other hand, in Floyd-Warshall algorithm we suppose we know the shortest path for all $u, v \in V$ using vertices $\{1, 2, \dots, k - 1\}$ and want to see if the shortest path from $u$ to $k$ and $k$ to $v$ give us a better one.
 		\begin{algorithm}[h!]
 			\caption{Bellman-Ford algorithm which runs in $O(VE)$}
 			\begin{algorithmic}[1]
@@ -2085,6 +2087,7 @@
 	
 	\chapter{All-Pairs Shortest Path}
 	For an alternative solution see exercise 5 of Bellman-Ford algorithm.
+	\par Note that in Floyd-Warshall shortest-path algorithm, we can have negative weights but negative cycles are not allowed.
 	\paragraph{Weight definition} We assume that the vertices are numbered $1, 2, \dots, |V|$, so that the input is an $n \times n$ matrix $W$ representing the edge weights of an n-vertex directed graph $G = (V, E)$. That is, $W = (w_{ij})$. Suppose $w(i, j)$ is the weight of directed edge $(i, j)$ in which $(i, j) \in E$. We define $w_{ij}$ as:
 	\begin{equation*}
 		w_{ij} = \begin{cases}
@@ -2120,6 +2123,22 @@
 			\end{algorithmic}
 		\end{algorithm*}
 		\FloatBarrier
+	For computing predecessor matrix:
+	\begin{equation*}
+	\begin{split}
+		\pi_{ij}^{(0)} &=
+		\begin{cases}
+			NIL & i = j \lor w_{ij} = \infty \\
+			i & i \ne j \land w_{ij} < \infty
+		\end{cases}
+		\\
+		\pi_{ij}^{(k)} &= 
+		\begin{cases}
+			\pi_{ij}^{(k - 1)} & d_{ij}^{(k - 1)} \le d_{ik}^{(k - 1)} + d_{kj}^{(k - 1)} \\
+			\pi_{kj} & d_{ij}^{(k - 1)} > d_{ik}^{(k - 1)} + d_{kj}^{(k - 1)}
+		\end{cases}
+	\end{split}
+	\end{equation*}
 	As you can see $d_{ij}^{(k)}$ is a 3-dimensional array. We can use a 2D array. We assumed $D_{ij}$ has the correct answer for intermediate vertices $1, 2, \dots, k - 1$. Now we want to add vertex $k$ as a new intermediate vertex:
 
 		\begin{algorithm*}[h!]
@@ -2178,7 +2197,39 @@
 			\end{algorithm*}
 		\end{itemize}
 	\end{enumerate}
-		
+
+	\subsection{Exercises}
+	\paragraph{Exercise 5}
+	It's correct because the only difference between this and the previous one is when we have two shortest path from $i$ to $j$, One choose the one which passes $k$ and the other don't.
+	\paragraph{Exercise 6}
+	If there is a negative cycle, we have at least one $d_{ii}^{(n)} < n$ for $i \in V$. Assuming $n = |V|$.
+    \phantomsection
+	\label{psec:floyd_warshall_exercise_8}
+	\paragraph{Exercise 8}
+	We know that for each vertex $v \in V$, if we run a DFS, we will visit all reachable vertices from $v$. This will take at most $|E| + 1$ times. We need that to do it for all vertices. So the total running time of algorithm is $O(VE)$. After running the following algorithm $T[1..V][1..V]$ has the solution for transitive closure.
+	
+	\begin{algorithm*}
+		\begin{algorithmic}[1]
+			\Function {DFS-VISIT}{G, T, s, u}
+				\State $T[s][u] = TRUE$
+				\ForAll{$v \in G.adj[u]$}
+					\If{$T[u][v] == FALSE$}
+						\State \Call{DFS-VISIT}{G, T, s, v}				
+					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	
+		\begin{algorithmic}[1]
+			\Function{Transitive-Closure}{G}
+				\State let $T[1..|V|][1..|V|]$ be a new array with False initialization
+				\ForAll{$v \in G.V$}
+					\State \Call{DFS-VISIT}{G, T, v, v}
+				\EndFor
+			\EndFunction
+		\end{algorithmic}	
+	\end{algorithm*}
+	\FloatBarrier	
 	\chapter{Maximum Flow}
 	\chapter{Flow networks}
 	\section{The Ford-Fulkerson method}
