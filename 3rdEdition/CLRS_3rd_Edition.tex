@@ -1569,7 +1569,8 @@
 			\end{algorithmic}			
 		\end{algorithm}		
 	
-	\section{The Bellman-Ford algorithm}		
+	\section{The Bellman-Ford algorithm}
+		There is also similarity between Bellman-Ford and Floyd-Warshall algorithm.		
 		\begin{algorithm}[h!]
 			\caption{Bellman-Ford algorithm which runs in $O(VE)$}
 			\begin{algorithmic}[1]
@@ -1722,6 +1723,46 @@
 							\State $w = w.\pi$
 						\EndWhile
 					\EndIf
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	\section{Single-source shortest paths in directed acyclic graphs}
+	Note that by running Strongly connected components on a normal graph we can convert it to a DAG.
+	\par Since there is not cycle, we are not worried about negative cycles but it's ok if we have at least one edge with negative weight.
+	\par First we sort all vertices in topological sort order. So if there is a path between $s$ (the root of shortest-path tree) to $u$, We visit $s$ before $u$. So we start from the first vertex in the topological sorted order and relax all its children. We do the same for the next vertex. The running time of this algorithm is $O(V + E)$.
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{Initialize-Single-Source}{$G,s$}
+				\ForAll{$v \in G.V$}
+					\State $v.d = \infty$
+					\State $v.\pi = NIL$
+				\EndFor
+				\State s.d = 0
+			\EndFunction
+		\end{algorithmic}
+	
+		\begin{algorithmic}[1]
+			\Function{Relax}{$u, v, w$}
+				\State relaxed = FALSE
+				\If{$v.d > u.d + w(u, v)$}
+					\State $v.d = u.d + w(u, v)$
+					\State $v.\pi = u$
+					\State relaxed = TRUE
+				\EndIf
+				\State return relaxed
+			\EndFunction
+		\end{algorithmic}	
+		
+		\begin{algorithmic}[1]
+			\Function{DAG-SHORTEST-PATHS}{$G,w,s$}
+				\State Topological sort the vertices in $G$
+				\State \Call{Initialize-Single-Source}{G,s}
+				\ForAll{vertex $u$ taken in topologically sorted order}
+					\ForAll{$v \in G.adj[u]$}
+						\State \Call{Relax}{u, v, w}
+					\EndFor
 				\EndFor
 			\EndFunction
 		\end{algorithmic}
