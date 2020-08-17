@@ -1573,6 +1573,7 @@
 	\section{The Bellman-Ford algorithm}
 		There is also similarity between Bellman-Ford and Floyd-Warshall algorithm.
 		\par In Bellman-Ford algorithm we know that a shortest path between $u$ and $v$ has at most $|V| - 1$ edges. So we relax all edges at most $|V| - 1$ times. On the other hand, in Floyd-Warshall algorithm we suppose we know the shortest path for all $u, v \in V$ using vertices $\{1, 2, \dots, k - 1\}$ and want to see if the shortest path from $u$ to $k$ and $k$ to $v$ give us a better one.
+		\par For some good example of this algorithm see \textbf{exercise 3} and examples \ref{psec:count_all_possible_paths_with_exactly_e_edges} and \ref{psec:shortest_path_with_exactly_k_edges}.
 		\begin{algorithm}[h!]
 			\caption{Bellman-Ford algorithm which runs in $O(VE)$}
 			\begin{algorithmic}[1]
@@ -1599,12 +1600,13 @@
 		\FloatBarrier	
 	\subsection{Exercises}
 	\paragraph{Exercise 3}
-	Since finding all shortest-paths require at most $m$ steps, it is obvious in $(m + 1)$\textsuperscript{th} iteration no $u.d$ will be updated for all $u \in V$.
+	See examples \ref{psec:count_all_possible_paths_with_exactly_e_edges} and \ref{psec:shortest_path_with_exactly_k_edges} for the application of this modified algorithm.
+	\par Suppose $\{v_{i_1}, v_{i_2}, \dots, v_{i_m}, v_{i_{m + 1}}\}$ is a shortest path between $u = v_{i_1}$ and $v = v_{i_{m + 1}}$. If the order of edges in $G.E$ are in such away that edge $(v_{i_k}, v_{i_{k + 1}})$ appears before edge $(v_{i_{k + 1}, v_{i_{k + 2}}})$ for all $1 \le i \le m - 1$, then in normal Bellman-Ford algorithm we discover the shortest path from $u$ to $v$ in the first iteration of outer loop ($m = 1$). To avoid that and make sure the algorithm find the shortest path between $u$ and $v$ after $m$ iterations, we define a new attribute named $v.d^\prime$ which is a copy of $v.d$ for all $v \in V$. Then during relaxation we update $v.d^\prime$, instead of $v.d$. After we relaxed all edges, then we sync $v.d$ with $v.d^\prime$.
 	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
 			\Function{BELLMAN-FORD2}{G, w, s}
 				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
-				\For{$i = 1$ \textbf{ to } $|G.V| - 1$}
+				\For{$m = 1$ \textbf{ to } $|G.V| - 1$} \Comment{shortest path with exactly $m$ edges}
 					\State $updated = FALSE$
 					\ForAll{edge $(u, v) \in G.E$}
 						\If{\Call{RELAX}{u, v, w} $ == TRUE$}
@@ -1614,23 +1616,38 @@
 					\If{updated $ == FALSE$}
 						\State break
 					\EndIf
+					\ForAll{$v \in G.V$}
+						\State $v.d = v.d^\prime$
+					\EndFor
 				\EndFor
+				\State \Return $m$
+			\EndFunction
+		\end{algorithmic}
+			\begin{algorithmic}[1]
+				\Function{Initialize-Single-Source}{$G,s$}
+					\ForAll{$v \in G.V$}
+						\State $v.d = \infty$
+						\State $v.d^\prime = \infty$
+						\State $v.\pi = NIL$
+					\EndFor
+					\State $s.d = 0$
+					\State $s.d^\prime = 0$
+				\EndFunction
+			\end{algorithmic}		
+		
+			\begin{algorithmic}[1]
+				\Function{RELAX}{u, v, w}
+					\If{$v.d^\prime > u.d + w(u, v)$}
+						\State $v.d^\prime = u.d + w(u, v)$
+						\State $v.\pi = u$
+						\State \Return $TRUE$
+					\Else
+						\State \Return $FALSE$
+					\EndIf
 			\EndFunction
 		\end{algorithmic}
 	\end{algorithm*}
-	\begin{algorithm*}[h!]
-		\begin{algorithmic}
-			\Function{RELAX}{u, v, w}
-				\If{$v.d > u.d + w(u, v)$}
-					\State $v.d = u.d + w(u, v)$
-					\State $v.\pi = u$
-					\State \Return $TRUE$
-				\Else
-					\State \Return $FALSE$
-				\EndIf
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm*}
+
 	\FloatBarrier
 	\paragraph{Exercise 4}
 	When we detect a negative cycle, we need to update $u.d = -\infty$. Then we need to update $d$ attribute for all reachable vertices from $u$ to $-\infty$.
@@ -2083,6 +2100,160 @@
 	\item \textbf{Single-pair shortest-path problem:}
 	Many problems for previous sections actually belong here.
 	\item \textbf{All-pair shortest-path problem:}
+		\begin{enumerate}
+			\phantomsection
+			\label{psec:count_all_possible_paths_with_exactly_e_edges}
+			\item Count all possible walks from a source to a destination with exactly e edges
+			\begin{itemize}
+				\item[\textbf{Solution 1:}] We can use an algorithm similar to Bellman-Ford shortest-path. The running time of this algorithm is $O(VE)$. We define $cnt[i][j]$ as the number of paths from $s$ to $i$ with exactly $j$ edges. As you can see we can improve space complexity by using $cnt^{\prime}[1..|V|][1..2]$, instead of $cnt[1..|V|][0..e]$. But for simplicity we use $cnt$.
+                    \begin{algorithm}[h!]
+                        \begin{algorithmic}[1]
+                            \Function{Initialize-Single-Source}{$G,s, d, e$}
+                                \ForAll{$v = 1$ to $|G.V|$}
+                                	\ForAll{$i = 1$ to $e$}
+                                		\State $cnt[v][i] = 0$
+                                	\EndFor
+                                \EndFor
+                                \State $cnt[s][0] = 1$
+                            \EndFunction
+                        \end{algorithmic}
+                        
+                        \begin{algorithmic}[1]
+                            \Function{Relax}{$u, v, d, i$}
+ 	                            \State $cnt[v][e] += cnt[u][e - 1]$
+                            \EndFunction
+                        \end{algorithmic}                    
+                        \begin{algorithmic}[1]
+                            \Function{Bellman-Ford}{$G,s, d, e$}
+                            	\State Let $cnt[1..|V|][0..e]$ be a new array
+                                \State \Call{Initialize-Single-Source}{G,s, d, e}
+                                \For{$i = 1$ TO $e$} \Comment{Finding shortest paths with exactly $i$ edges}
+                                    \ForAll{$(u, v) \in G.E$}
+                                        \State \Call{Relax}{u, v, d, i}
+                                    \EndFor
+                                \EndFor
+                                \State return $cnt[s][d][k]$
+                            \EndFunction
+                        \end{algorithmic}
+                    \end{algorithm}
+                	\FloatBarrier				
+				
+				\item[\textbf{Solution 2:}] You can use DFS but without marking the previously visited vertices. The running time of this algorithm is $O(V^k)$. For more information visit this \href{https://www.geeksforgeeks.org/count-possible-paths-source-destination-exactly-k-edges/}{website}.
+				\par There is a better solution using an algorithm similar to Floyd-Warshall shortest past algorithm. We define $cnt[i][j][v]$ as the number of all paths from $i$ to $j$ which have exactly $v$ vertices as intermediate. In other words a path like $i, v_{i_1}, v_{i_2}, \dots, v_{i_v}, j$. So if we want to find the number of paths between $s$ and $d$ with exactly $e$ edges, we need to find $cnt[s][d][e - 1]$. So we define adjacency matrix $A=(a_{ij})$ as:
+				\begin{equation*}
+				a_{ij} = \begin{cases}
+					0 & i = j \lor (i, j) \notin E\\
+					1 & i \ne j \land (i, j) \in E
+				\end{cases}
+				\end{equation*}
+				So we have:
+				\begin{algorithm}[h!]
+					\begin{algorithmic}[1]
+						\State \Function{Count-Paths}{A, s, d, e}
+							\State $n = A.rows$
+							\State let $cnt[1..n][1..n][e - 1]$ be a new array
+							\ForAll{$i = 1$ to n}
+								\ForAll{$j = 1$ to n}
+									\State $cnt[i][j][0] = A[i][j]$
+								\EndFor
+							\EndFor
+							\ForAll{$v = 1$ to $e - 1$}
+								\ForAll{$i = 1$ to $n$}
+									\ForAll{$j = 1$ to $n$}
+										\State $cnt[i][j][v] = 0$
+										\ForAll{$k = 1$ to $n$}
+											\If{$A[i][k] \ne 0 \land k \ne j$} \Comment{We know $A[i][i] = 0$}
+												\State $cnt[i][j][v] += cnt[k][j][v - 1]$
+											\EndIf
+										\EndFor
+									\EndFor
+								\EndFor
+							\EndFor
+							\State \Return $cnt[s][d][e - 1]$
+						\EndFunction
+					\end{algorithmic}
+				\end{algorithm}
+			\FloatBarrier
+			\end{itemize}
+			\phantomsection
+			\label{psec:shortest_path_with_exactly_k_edges}
+			\item Shortest path with exactly k edges in a directed and weighted graph
+				\begin{itemize}
+					\item[\textbf{Solution 1:}] For more information visit this \href{https://www.geeksforgeeks.org/shortest-path-with-exactly-k-edges-in-a-directed-and-weighted-graph-set-2/?ref=rp}{page}.
+					\par We can use an algorithm similar to Bellman-Ford shortest path. We define $d[i][j]$ as the shortest path from $s$ to $i$ with exactly $j$ edges. The running time of this algorithm is $O(VE)$. As you can see for saving more space we can use $d^{\prime}[1..|V|][1..2]$, instead of $d[1..|V|][0..k]$ but for simplicity we use the spacious one.
+                    \begin{algorithm}[h!]
+                        \begin{algorithmic}[1]
+                            \Function{Initialize-Single-Source}{$G,s, d, k$}
+                                \ForAll{$v = 1$ to $|G.V|$}
+                                	\ForAll{$i = 1$ to $k$}
+                                		\State $d[v][i] = \infty$
+                                	\EndFor
+                                \EndFor
+                                \State $d[s][0] = 0$
+                            \EndFunction
+                        \end{algorithmic}
+                        
+                        \begin{algorithmic}[1]
+                            \Function{Relax}{$u, v, w, d, e$}
+                                \If{$d[v][e] > d[u][e - 1] + w(u, v)$}
+                                    \State $d[v][e] = d[u][e - 1] + w(u, v)$
+                                \EndIf
+                            \EndFunction
+                        \end{algorithmic}                    
+                        \begin{algorithmic}[1]
+                            \Function{Bellman-Ford}{$G,w,s, d, k$}
+                            	\State Let $d[1..|V|][0..k]$ be a new array
+                                \State \Call{Initialize-Single-Source}{G,s, d, k}
+                                \For{$e = 1$ TO $k$} \Comment{Finding shortest paths with exactly $e$ edges}
+                                    \ForAll{$(u, v) \in G.E$}
+                                        \State \Call{Relax}{u, v, w, d, e}
+                                    \EndFor
+                                \EndFor
+                                \State return $d[s][d][k]$
+                            \EndFunction
+                        \end{algorithmic}
+                    \end{algorithm}
+                	\FloatBarrier
+					\item[\textbf{Solution 2:}] For more information visit this \href{https://www.geeksforgeeks.org/shortest-path-exactly-k-edges-directed-weighted-graph/}{website}.
+					\par We can use an algorithm similar to Floyd-Warshall shortest path. We define $d[i][j][m]$ as the shortest path from $i$ to $j$ with exactly $m$ intermediate vertices. In other words, a path like $i, v_{i_1}, v_{i_2}, \dots, v_{i_m}, j$. So the shortest path between $s$ and $d$ with exactly $k$ edges is $d[s][d][k - 1]$. We define adjacency matrix $W = (w_{ij})$ like this:
+					\begin{equation*}
+						w_{ij} = \begin{cases}
+							0 & i = j \\
+							w(i, j) & i \ne j \land (i, j) \in E \\
+							\infty & i \ne j \land (i, j) \notin E
+						\end{cases}
+					\end{equation*}
+					See the following implementation for more details. The running time of this algorithm is $O(V^3 \times k)$
+                    \begin{algorithm}[h!]
+                        \begin{algorithmic}[1]
+                            \State \Function{Shortest-Paths}{W, s, d, e}
+                                \State $n = W.rows$
+                                \State let $d[1..n][1..n][e - 1]$ be a new array
+                                \ForAll{$i = 1$ to n}
+                                    \ForAll{$j = 1$ to n}
+                                        \State $d[i][j][0] = W[i][j]$
+                                    \EndFor
+                                \EndFor
+                                \ForAll{$v = 1$ to $e - 1$}
+                                    \ForAll{$i = 1$ to $n$}
+                                        \ForAll{$j = 1$ to $n$}
+                                            \State $cnt[i][j][v] = \infty$
+                                            \ForAll{$k = 1$ to $n$}
+                                                \If{$A[i][k] \ne \infty \land k \ne i \land k \ne j \land d[k][j][v - 1] \ne \infty$}
+                                                    \State $d[i][j][v] = \min{(d[i][j][v], A[i][k] + d[k][j][v - 1])}$
+                                                \EndIf
+                                            \EndFor
+                                        \EndFor
+                                    \EndFor
+                                \EndFor
+                                \State \Return $cnt[s][d][e - 1]$
+                            \EndFunction
+                        \end{algorithmic}
+                    \end{algorithm}
+                \FloatBarrier					
+					
+				\end{itemize}
+		\end{enumerate}
 	\end{enumerate}
 	
 	\chapter{All-Pairs Shortest Path}
