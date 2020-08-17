@@ -1602,7 +1602,6 @@
 	\paragraph{Exercise 3}
 	See examples \ref{psec:count_all_possible_paths_with_exactly_e_edges} and \ref{psec:shortest_path_with_exactly_k_edges} for the application of this modified algorithm.
 	\par Suppose $\{v_{i_1}, v_{i_2}, \dots, v_{i_m}, v_{i_{m + 1}}\}$ is a shortest path between $u = v_{i_1}$ and $v = v_{i_{m + 1}}$. If the order of edges in $G.E$ are in such away that edge $(v_{i_k}, v_{i_{k + 1}})$ appears before edge $(v_{i_{k + 1}, v_{i_{k + 2}}})$ for all $1 \le i \le m - 1$, then in normal Bellman-Ford algorithm we discover the shortest path from $u$ to $v$ in the first iteration of outer loop ($m = 1$). To avoid that and make sure the algorithm find the shortest path between $u$ and $v$ after $m$ iterations, we define a new attribute named $v.d^\prime$ which is a copy of $v.d$ for all $v \in V$. Then during relaxation we update $v.d^\prime$, instead of $v.d$. After we relaxed all edges, then we sync $v.d$ with $v.d^\prime$.
-	\par \textbf{This new algorithm guarantee that at the end of iteration $m=k$, We have all shortest path starting from $s$ which have exactly $k$ edges.}
 	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
 			\Function{BELLMAN-FORD2}{G, w, s}
@@ -1648,8 +1647,55 @@
 			\EndFunction
 		\end{algorithmic}
 	\end{algorithm*}
-
 	\FloatBarrier
+	
+	Note that if we want to know the shortest paths from $s$ to other vertices with exactly $1 \le k \le m$ edges, instead of $v.d^\prime$ we can use $v.d[0..|G.V| - 1]$. So $v.d[i]$ tell us the shortest path from $s$ to $i$ with exactly $i$ edges:
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{BELLMAN-FORD3}{G, w, s}
+				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, s}
+				\For{$m = 1$ \textbf{ to } $|G.V| - 1$} \Comment{shortest path with exactly $m$ edges}
+					\State $updated = FALSE$
+					\ForAll{edge $(u, v) \in G.E$}
+						\If{\Call{RELAX}{u, v, w, m} $ == TRUE$}
+							\State $updated = TRUE$
+						\EndIf
+					\EndFor
+					\If{updated $ == FALSE$}
+						\State break
+					\EndIf
+					\ForAll{$v \in G.V$}
+						\State $v.d = v.d^\prime$
+					\EndFor
+				\EndFor
+				\State \Return $m$
+			\EndFunction
+		\end{algorithmic}
+			\begin{algorithmic}[1]
+				\Function{Initialize-Single-Source}{$G,s$}
+					\ForAll{$v \in G.V$}
+						\ForAll{$i = 0$ to $|G.V| - 1$}
+							\State $v.d[i] = \infty$
+							\State $v.\pi[i] = NIL$
+						\EndFor
+					\EndFor
+					\State $s.d[0] = 0$
+				\EndFunction
+			\end{algorithmic}		
+		
+			\begin{algorithmic}[1]
+				\Function{RELAX}{u, v, w, m}
+					\If{$v.d[m] > u.d[m - 1] + w(u, v)$}
+						\State $v.d[m] = u.d[m - 1] + w(u, v)$
+						\State $v.\pi[m] = u$
+						\State \Return $TRUE$
+					\Else
+						\State \Return $FALSE$
+					\EndIf
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier	
 	\paragraph{Exercise 4}
 	When we detect a negative cycle, we need to update $u.d = -\infty$. Then we need to update $d$ attribute for all reachable vertices from $u$ to $-\infty$.
 	\begin{algorithm*}[h!]
