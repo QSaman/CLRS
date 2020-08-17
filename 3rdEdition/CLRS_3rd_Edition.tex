@@ -1698,11 +1698,11 @@
 		\end{algorithmic}
 	\end{algorithm*}
 	\FloatBarrier
-	If we are only interested in shortest paths from $s$ to other vertices with exactly $y$ edges, instead of $d[1..|V|][0..y]$, we can have $d^\prime[1..|V|][1..2]$. For simplicity I use $v.d$ and $v.d^\prime$ like the first implementation to see with a little modification of the solution we can achieve it. Suppose we want to know the shortest path from $src$ to $dst$ with exactly $y$ edges:
+	If we are only interested in shortest paths from $s$ to other vertices with exactly $y$ edges, instead of $d[1..|V|][0..y]$, we can have $d^\prime[1..|V|][1..2]$. For simplicity I use $v.d$ and $v.d^\prime$ like $BELLMAN-FORD2$ to see with a little modification of the solution we can achieve it. Suppose we want to know the shortest path from $src$ to $dst$ with exactly $y$ edges:
 	
 	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
-			\Function{BELLMAN-FORD2}{G, w, src, dst, y}
+			\Function{BELLMAN-FORD4}{G, w, src, dst, y}
 				\State \Call{INITIALIZE-SINGLE-SOURCE}{G, src}
 				\For{$m = 1$ \textbf{ to } $y$} \Comment{shortest path with exactly $m$ edges}
 					\State $updated = FALSE$
