@@ -1602,6 +1602,7 @@
 	\paragraph{Exercise 3}
 	See examples \ref{psec:count_all_possible_paths_with_exactly_e_edges} and \ref{psec:shortest_path_with_exactly_k_edges} for the application of this modified algorithm.
 	\par Suppose $\{v_{i_1}, v_{i_2}, \dots, v_{i_m}, v_{i_{m + 1}}\}$ is a shortest path between $u = v_{i_1}$ and $v = v_{i_{m + 1}}$. If the order of edges in $G.E$ are in such away that edge $(v_{i_k}, v_{i_{k + 1}})$ appears before edge $(v_{i_{k + 1}, v_{i_{k + 2}}})$ for all $1 \le i \le m - 1$, then in normal Bellman-Ford algorithm we discover the shortest path from $u$ to $v$ in the first iteration of outer loop ($m = 1$). To avoid that and make sure the algorithm find the shortest path between $u$ and $v$ after $m$ iterations, we define a new attribute named $v.d^\prime$ which is a copy of $v.d$ for all $v \in V$. Then during relaxation we update $v.d^\prime$, instead of $v.d$. After we relaxed all edges, then we sync $v.d$ with $v.d^\prime$.
+	\par \textbf{This new algorithm guarantee that at the end of iteration $m=k$, We have all shortest path starting from $s$ which have exactly $k$ edges.}
 	\begin{algorithm*}[h!]
 		\begin{algorithmic}[1]
 			\Function{BELLMAN-FORD2}{G, w, s}
