@@ -2719,7 +2719,6 @@
 	\end{algorithm*}		
 	\FloatBarrier
 	\par Instead of queue, we can use a priority queue. This implementation is similar to Dijkstra shortest path algorithm. Function INSERT(Q, vertex, key) insert $(vertex, key)$ into priority queue. Function Extract-Max(Q) extracts the vertex in which $key$ is maximum. We use $(u, v).c_f$ as key. Note that if indegree vertex $v$ is more than 1, then it's possible we inserted $v$ more than once. In other words the maximum size of priority queue is $|G.E|$. Finding an augmenting path using the following implementation takes $O(E\log{E}) = O(E\log{V})$.
-	\par If we want to use an implementation similar to $O(V^2 + E)$ in Dijkstra shortest path, then finding an augmenting path takes $O(E^2 + E)$.
 	
     \begin{algorithm*}[h!]
         \begin{algorithmic}[1]
@@ -2739,8 +2738,8 @@
                 \State \Call{INSERT}{Q, s, $\infty$}
                 \State $found = FALSE$
                 \State $visited = 0$
-                \While{$Q \ne \emptyset \land visited < |G.V|$}
-                    \State $u=$ \Call{Extract-Max}{Q}
+                \While{$Q \ne \emptyset \land visited < |G.V|$} \Comment{$O(E)$}
+                    \State $u=$ \Call{Extract-Max}{Q} \Comment{$O(\log{E})$}
                     \If{$u \in S$}
                     	\State continue
                     \EndIf
@@ -2750,11 +2749,11 @@
 						\State $found = TRUE$
 						\State break
 					\EndIf                    
-                    \ForAll{$v \in G.adv[u]$}
+                    \ForAll{$v \in G.adv[u]$} \Comment{$\sum_{v \in V}{outdegree(v)} = O(E)$}
                     	\If{$(u, v).c_f > 0 \land v \notin S$}
                     		\State $v.\pi = u$
                     		\State $v.minCap = \min(v.minCap, (u, v).c_f)$
-                    		\State \Call{INSERT}{Q, v, $(u, v).c_f$}
+                    		\State \Call{INSERT}{Q, v, $(u, v).c_f$} \Comment{$O(\log{E})$}
                         \EndIf
                     \EndFor
                 \EndWhile
@@ -2767,7 +2766,58 @@
         \end{algorithmic}		
     \end{algorithm*}
     \FloatBarrier	
+	\par If we want to use an implementation similar to $O(V^2 + E)$ in Dijkstra shortest path, then finding an augmenting path takes $O(E^2 + E)$:
 	
+	\begin{algorithm}[h!]
+		\begin{algorithmic}[1]
+			\Function{FIND-AUGMENTING-PATH}{G, s, t}
+				\State \Call{Initialize-Single-Source}{$G,s$}
+				
+				\State $found = FALSE$
+				\For {$i = 1$ to $|G.E|$} \Comment{$O(E)$}
+					\State $max = 0$
+					\ForAll{$(x, y) \in G.E$} \Comment{$O(E)$}
+						\If{$(x, y).mark == FALSE \land (x, y).d > max$}
+							\State $max = (x, y).d$
+							\State $(p, u) = (x, y)$
+						\EndIf
+					\EndFor
+					\State $(p, u).mark = TRUE$
+					\If{$u == t$}
+						\State $found = TRUE$
+						\State break
+					\EndIf
+					\ForAll{$v \in G.adj[u]$} \Comment{$\sum_{v \in V}{outdegree(v)} = O(E)$}
+						\If{$(u, v).mark == FALSE \land (u, v).c_f > 0$}
+							\State $v.\pi = u$
+							\State $v.minCap = \min(v.minCap, (u, v).c_f)$
+							\State $(u, v).d = (u, v).c_f$
+						\EndIf
+					\EndFor
+				\EndFor
+				\If{$found == TRUE$}
+					\State \Return $t.minCap$
+				\Else
+					\State \Return 0
+				\EndIf
+			\EndFunction
+		\end{algorithmic}
+		\begin{algorithmic}[1]
+		\Function{Initialize-Single-Source}{$G,s$}
+			\State $G.E = G.E \cup (s, s)$
+			\ForAll{$(u, v) \in G.E$} \Comment{$O(E)$}
+				\State $(u, v).d = 0$
+				\State $(u,v).mark = FALSE$
+			\EndFor
+			\State $(s, s).d = \infty$
+			\ForAll{$v \in G.V$}
+				\State $v.\pi = NIL$
+			\EndFor
+		\EndFunction
+	\end{algorithmic}
+	\end{algorithm}
+	\FloatBarrier	
+		
 	\par Note that equation \ref{eq:ResidualCapacityWithAntiParallel} not only is the general definition of equation \ref{eq:ResidualCapacityNoAntiParallel}, but also easier to implement. Unlike equation \ref{eq:ResidualCapacityNoAntiParallel} which required the amount of edge flow, equation \ref{eq:ResidualCapacityWithAntiParallel} only relies on previous residual capacities.\\
 	Now we need to redefine equation \ref{eq:augmentationOfFlowNoAntiparallel}. Suppose $p$ is an augmenting path in the i\textsuperscript{th} step.
 	\begin{equation}
