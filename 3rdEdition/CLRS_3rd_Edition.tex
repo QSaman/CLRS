@@ -1373,7 +1373,7 @@
 		\end{algorithm}
 		\FloatBarrier	
 	
-	For a simple $O(V^2)$ implementation of Prim algorithm see exercise 2.
+	For a simple $O(V^2)$ implementation of Prim algorithm see exercise 2. Also see Dijkstra shortest path algorithm.
 	\paragraph{Exercise 2}
 	We add a new variable named $u.MST$ to every vertex of graph. It's a boolean variable. It determines whether or not the vertex belongs to minimum spanning tree. As you can see I didn't use an adjacency matrix. You can easily replace it with adjacency matrix. The running time of this algorithm is $O(V^2)$. To be more specific, finding the minimum safe edge (lines 10-15) takes $O(V^2)$. Updating the keys (lines 17-22) takes no more than the sum of out-degree of each vertex. As we know 
 	\begin{equation*}
@@ -1890,10 +1890,7 @@
 		\end{algorithmic}
 	\end{algorithm*}
 	\FloatBarrier	
-	\section{Dijkstra's algorithm}
-	For an intuition of Dijkstra shortest path, see figure \ref{fig:dijkstra-shortest-path-algorithm}.
-	
-	
+	\section{Dijkstra's algorithm}		
 		\begin{algorithm*}[h!]
 			\begin{algorithmic}[1]
 				\Function{Initialize-Single-Source}{$G,s$}
@@ -1921,26 +1918,118 @@
 				\Function{Dijkstra}{$G,w,s$}
 					\State \Call{Initialize-Single-Source}{G,s}
 					\State $S = \emptyset$
-					\State $Q = G.V$
-					\While{$Q \ne \emptyset$}
-						\State $u=$ \Call{Extract-Min}{Q}
+					\State $Q = G.V$ \Comment{heapify: $O(V)$}
+					\While{$Q \ne \emptyset$} \Comment{$O(V)$}
+						\State $u=$ \Call{Extract-Min}{Q} \Comment{$O(\log{V})$ or $O(V)$}
 						\State $S = S \cup \{u\}$
-						\ForAll{$v \in G.adv[u]$}
-							\State \Call{Relax}{u, v, w}
+						\ForAll{$v \in G.adv[u]$} \Comment{$\sum_{v \in V}{outdegree(v)} = O(E)$}
+							\If{\Call{Relax}{u, v, w} == TRUE}
+								\State \Call{Decrease-Key}{Q, v, v.d} \Comment{$O(\log{V})$ or $O(1)$}
+							\EndIf
 						\EndFor
 					\EndWhile
 				\EndFunction
 			\end{algorithmic}		
 		\end{algorithm*}
 		\FloatBarrier
-	
-	\begin{figure}
-	\centering
-	\caption{Dijkstra Shortest Path Algorithm}
-	\label{fig:dijkstra-shortest-path-algorithm}
-	\includegraphics[width=\linewidth]{images/dijkstra-shortest-path.jpg}
-	\end{figure}
+	As you can see if we implement Dijkstra algorithm using binary heap, converting the array to a heap (heapify) takes $O(V)$. At the beginning the size of $Q$ is $|V|$ and in each iteration we extracting the minimum. So it takes $O(V\log{V})$. Decreasing the key (up-heapifying)  is done at most $E$ times ($\sum_{v \in V}{outdegree(v)} = E$). So it takes $O(E\log{V})$. So the total running time is $O(V\log{V} + E\log{V})$.
+	\par If we use a heap like Fibonacci or Brodal heap which takes $O(1)$ for decreasing the key, the total running time is $O(V\log{V}) + O(E)$. For more information about heaps see this \href{https://en.wikipedia.org/wiki/Heap_(data_structure)}{page}.
+	\par Instead of heap we can use a normal array. So it takes $O(V)$ to populate the array. Finding the minimum takes $O(V)$. So EXTRACT-MIN takes $O(V^2)$. DECREASE-KEY takes $O(1)$. So the total running time of this implementation is $O(V^2) + O(E)$. If $E = O(V^2)$ then this implementation has the same performance as Fibonacci implementation:
+	\begin{algorithm}[h!]
+		\caption{$O(V^2) + O(E)$ Dijkstra shortest path}		
+		\begin{algorithmic}[1]
+			\Function{Dijkstra}{$G,w,s$}
+				\State \Call{Initialize-Single-Source}{$G,s$}
+				\For {$i = 1$ to $|G.V|$} \Comment{$O(V)$}
+					\State $min = \infty$
+					\ForAll{$w \in G.V$} \Comment{$O(V)$}
+						\If{$w.mark == FALSE \land w.d < min$}
+							\State $min = w.d$
+							\State $u = w$
+						\EndIf
+					\EndFor
+					\State $u.mark = TRUE$
+					\ForAll{$v \in G.adj[u]$} \Comment{$\sum_{v \in V}{outdegree(v)} = O(E)$}
+						\If{$v.mark == FALSE$}
+							\State \Call{Relax}{$u, v, w$}
+						\EndIf
+					\EndFor
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+		\begin{algorithmic}[1]
+		\Function{Initialize-Single-Source}{$G,s$}
+			\ForAll{$v \in G.V$}
+				\State $v.d = \infty$
+				\State $v.\pi = NIL$
+			\EndFor
+			\State s.d = 0
+		\EndFunction
+	\end{algorithmic}
+
+	\begin{algorithmic}[1]
+		\Function{Relax}{$u, v, w$}
+			\State relaxed = FALSE
+			\If{$v.d > u.d + w(u, v)$}
+				\State $v.d = u.d + w(u, v)$
+				\State $v.\pi = u$
+				\State relaxed = TRUE
+			\EndIf
+			\State return relaxed
+		\EndFunction
+	\end{algorithmic}	
+	\end{algorithm}
 	\FloatBarrier
+	In most languages like std::priority\_queue in C++, we don't have operation Decrease-Key. We can insert an edge instead of a vertex. More precisely $(u, v).d = v.d = u.d + w(u, v0)$. We define function $INSERT(PQ, v, (u, v).d)$ that insert edge $(u, v)$ into the priority queue. The key in priority queue is $(u, v).d$, so $Extract-Min(PQ)$ returns $v$.
+	\par In this case extracting the minimum takes $O(E\log{E})$. Inserting into priority queue which is equivalent to Decrease-Key takes also $O(E\log{E})$. So the total running time of this implementation is $O(E\log{E})$. So the total running time of this algorithm is $O(E\log{E}) = O(E\log{V^2}) = O(2E\log{V}) = O(E\log{V})$. If $E = O(V^2)$ this implementation is worse than the previous one. But for maximum flow implementation this implementation has better running time.
+	
+    \begin{algorithm*}[h!]
+		\caption{$O(E\log{V})$ Dijkstra shortest path}    	        
+        \begin{algorithmic}[1]
+            \Function{Dijkstra}{$G,w,s$}
+                \State \Call{Initialize-Single-Source}{G,s}
+                \State $S = \emptyset$
+                \State \Call{INSERT}{PQ, s, 0}
+                \State $visited = 0$
+                \While{$PQ \ne \emptyset \land visited < |G.V|$} \Comment{$O(E)$}
+                    \State $u=$ \Call{Extract-Min}{PQ} \Comment{$O(\log{E})$}
+                    \If{$u \in S$}
+                    	\State continue
+                    \EndIf
+                    \State $visited = visited + 1$
+                    \State $S = S \cup \{u\}$               
+                    \ForAll{$v \in G.adv[u]$} \Comment{$\sum_{v \in V}{outdegree(v)} = O(E)$}
+                    	\If{$v \notin S \land \Call{Relax}{$u, v, w$}$}
+                    		\State \Call{INSERT}{Q, v, v.d} \Comment{$O(\log{E})$}
+                        \EndIf
+                    \EndFor
+                \EndWhile
+            \EndFunction
+        \end{algorithmic}
+        
+		\begin{algorithmic}[1]
+		\Function{Initialize-Single-Source}{$G,s$}
+			\ForAll{$v \in G.V$}
+				\State $v.d = \infty$
+				\State $v.\pi = NIL$
+			\EndFor
+		\EndFunction
+		\end{algorithmic}
+
+		\begin{algorithmic}[1]
+		\Function{Relax}{$u, v, w$}
+			\State relaxed = FALSE
+			\If{$v.d > u.d + w(u, v)$}
+				\State $v.d = u.d + w(u, v)$
+				\State $v.\pi = u$
+				\State relaxed = TRUE
+			\EndIf
+			\State return relaxed
+		\EndFunction
+		\end{algorithmic}        		
+		\end{algorithm*}
+    \FloatBarrier	
+	
 	\subsection{Exercises}
 	\paragraph{Exercise 6}
 	Suppose the path $p = (v_0, v_1, \dots, v_k)$ in which $v_0 = u$ and $v_k = v$ is one of the paths between $u$ and $v$. Since the probabilities are independent we want to find $\max(\prod_{i = 0}^{k - 1}r(v_i, v_{i+1}))$. We can reduce the problem to a shortest-path one by changing the weight function $w(u, v) = r(u, v)$ to $w'(u, v) = -\log{r(u, v)}$.
@@ -2537,7 +2626,9 @@
 	\end{equation*}
 	So we can use $|f \uparrow f_p| = |f| + |f_p| > |f|$ to increase the flow until we reach maximum flow.
 	\subparagraph{Allowing antiparallel edges}
-	Suppose in flow network $G = (V, E)$ it is possible $(u, v) \in E \land (v, u) \in E$. We need to redefine some definitions. Consider Ford-Fulkerson algorithm. In each step we increase flow $f$ until we reach maximum flow. Suppose the flow of $G$ is $f_i$ in i\textsuperscript{th} step. So we have $f_1, f_2, \dots, f_m$. It is obvious $|f_1| = 0$ and $|f_m|$ is the value of maximum flow. Suppose we are in the i\textsuperscript{th} step and $p$ is an augmenting path from source to sink. The \textbf{residual capacity} in the i\textsuperscript{th} step is given by
+	Suppose in flow network $G = (V, E)$ it is possible $(u, v) \in E \land (v, u) \in E$. We need to redefine some definitions. Consider Ford-Fulkerson algorithm. In each step we increase flow $f$ until we reach maximum flow. Suppose the flow of $G$ is $f_i$ in i\textsuperscript{th} step. So we have $f_1, f_2, \dots, f_m$. It is obvious $|f_1| = 0$ and $|f_m|$ is the value of maximum flow.
+	\par Suppose the network has $|f_{i - 1}|$ and $p$ is an augmenting path from source to sink. We define \textbf{residual capacity} of $p$ as $c_{f_i}(p) = \min\{c_{f_{i - 1}}(u, v) : (u, v) \text{ is on } p\}$.
+	 \par Suppose we are in the i\textsuperscript{th} step and $p$ is an augmenting path from source to sink. The \textbf{residual capacity} in the i\textsuperscript{th} step is given by
 	\begin{equation}
 	\label{eq:ResidualCapacityWithAntiParallel}
 		c_{f_i}(u, v) = \begin{cases}
@@ -2546,7 +2637,138 @@
 		c_{f_{i - 1}}(u, v) & \text{otherwise}
 		\end{cases}
 	\end{equation}
-	For the base case we have $c_{f_1} = C$ in which $C$ is the capacities for all edges. Note that equation \ref{eq:ResidualCapacityWithAntiParallel} not only is the general definition of equation \ref{eq:ResidualCapacityNoAntiParallel}, but also easier to implement. Unlike equation \ref{eq:ResidualCapacityNoAntiParallel} which required the amount of edge flow, equation \ref{eq:ResidualCapacityWithAntiParallel} only relies on previous residual capacities.\\
+	For the base case we have $c_{f_1} = C$ in which $C$ is the capacities for all edges. 
+	\par Now consider the Ford-Fulkerson Algorithm. For $(u, v) \in G.E$, $(u, v).c$ is the capacity of that edge. We don't change it during the iteration. $(u,v).c_f$ is residual capacity of edge $(u, v)$ which changes during the execution. $(u, v).f$ is the current flow in $(u, v)$. If it's negative it means the actual flow is from $v$ to $u$. So $(u, v).f = -(v, u).f$. Also we assume if $(u, v) \in G.E$ then $(v, u) \in E$. $v.minCap$ is the minimum $c_f$ in the chosen path from $s$ to $t$. 
+	
+	\begin{algorithm*}[h!]
+		\begin{algorithmic}[1]
+			\Function{Ford-Fulkerson}{G, s, t}
+				\ForAll{$(u, v) \in G.E$}
+					\State $(u,v).c_f = (u,v).c$
+					\State $(u, v).f = 0$
+				\EndFor
+				\While{$TRUE$}						
+					\State minCap = \Call{FIND-AUGMENTING-PATH}{G, s, t}
+					\If{$minCap = 0$}
+						\State break
+					\EndIf
+					\State $v = t$
+					\While{$v \ne NIL$}
+						\State $u = v.\pi$
+						\State $(u , v).c_f = (u , v).c_f - minCap$
+						\State $(u, v).f = (u, v).f + minCap$ 
+						\State $(v, u).c_f = (v, u).c_f + minCap$
+						\State $(v, u).f = (v, u).f - minCap$
+						\State $v = u$
+					\EndWhile
+				\EndWhile
+			\EndFunction
+		\end{algorithmic}
+	\end{algorithm*}
+	\FloatBarrier
+	Implementation function FIND-AUGMENTING-PATH can be trick. If we use BFS, the algorithm is called Edmonds-Karp. The running time of that algorithm is $O(VE^2)$. If we choose the path poorly (for example using DFS instead of BFS) the algorithm many never exit.
+	
+	\begin{algorithm*}[h!]
+		\caption{Edmonds-Karp algorithm}
+		\begin{algorithmic}
+			\Statex
+		\end{algorithmic}
+        \begin{algorithmic}[1]
+		\Function{Initialize-Single-Source}{$G,s$}
+			\ForAll{$v \in G.V$}
+				\State $v.color = WHITE$
+				\State $v.d = \infty$
+				\State $v.\pi = NIL$
+				\State $v.minCap = \infty$
+			\EndFor
+			\State s.d = 0
+		\EndFunction
+		\end{algorithmic}	
+	
+		\begin{algorithmic}[1]		
+			\Function{FIND-AUGMENTING-PATH}{G, s, t}
+				\State \Call{Initialize-Single-Source}{$G,s$}
+				\State $s.color = GRAY$
+				\State $s.\pi = NIL$
+				\State $Q = \emptyset$
+				\State \Call{Enqueue}{Q, s}
+				\State $found = FALSE$
+				\While{$Q \ne \emptyset$}
+					\State $u = $ \Call{Dequeue}{Q}
+					\If{$u == t$}
+						\State $found = TRUE$
+						\State break
+					\EndIf
+					\ForAll{$v \in G.adj[u]$}
+						\If{$v.color == WHITE \land (u, v).c_f > 0$} 
+							\State $v.color = GRAY$
+							\State $v.\pi = u$
+							\State $v.minCap = \min(v.minCap, (u, v).c_f)$
+							\State \Call{Enqueue}{Q, v}
+						\EndIf
+					\EndFor
+					\State $u.color = BLACK$
+				\EndWhile
+				\If{$found = TRUE$}
+					\State \Return $t.minCap$
+				\Else
+					\State \Return 0
+				\EndIf
+			\EndFunction
+		\end{algorithmic}				
+	\end{algorithm*}		
+	\FloatBarrier
+	\par Instead of queue, we can use a priority queue. This implementation is similar to Dijkstra shortest path algorithm. Function INSERT(Q, vertex, key) insert $(vertex, key)$ into priority queue. Function Extract-Max(Q) extracts the vertex in which $key$ is maximum. We use $(u, v).c_f$ as key. Note that if indegree vertex $v$ is more than 1, then it's possible we inserted $v$ more than once. In other words the maximum size of priority queue is $|G.E|$. Finding an augmenting path using the following implementation takes $O(E\log{E}) = O(E\log{V})$.
+	\par If we want to use an implementation similar to $O(V^2 + E)$ in Dijkstra shortest path, then finding an augmenting path takes $O(E^2 + E)$.
+	
+    \begin{algorithm*}[h!]
+        \begin{algorithmic}[1]
+            \Function{Initialize-Single-Source}{$G,s$}
+                \ForAll{$v \in G.V$}
+                    \State $v.\pi = NIL$
+                    \State $v.minCap = \infty$
+                \EndFor
+                \State s.d = 0
+            \EndFunction
+        \end{algorithmic}
+        
+        \begin{algorithmic}[1]
+            \Function{FIND-AUGMENTING-PATH}{G, s, t}
+                \State \Call{Initialize-Single-Source}{G,s}
+                \State $S = \emptyset$
+                \State \Call{INSERT}{Q, s, $\infty$}
+                \State $found = FALSE$
+                \State $visited = 0$
+                \While{$Q \ne \emptyset \land visited < |G.V|$}
+                    \State $u=$ \Call{Extract-Max}{Q}
+                    \If{$u \in S$}
+                    	\State continue
+                    \EndIf
+                    \State $visited = visited + 1$
+                    \State $S = S \cup \{u\}$
+                    \If{$u == t$}
+						\State $found = TRUE$
+						\State break
+					\EndIf                    
+                    \ForAll{$v \in G.adv[u]$}
+                    	\If{$(u, v).c_f > 0 \land v \notin S$}
+                    		\State $v.\pi = u$
+                    		\State $v.minCap = \min(v.minCap, (u, v).c_f)$
+                    		\State \Call{INSERT}{Q, v, $(u, v).c_f$}
+                        \EndIf
+                    \EndFor
+                \EndWhile
+                \If{$found == TRUE$}
+                	\State \Return $t.minCap$
+                \Else
+                	\State \Return $0$
+                \EndIf
+            \EndFunction
+        \end{algorithmic}		
+    \end{algorithm*}
+    \FloatBarrier	
+	
+	\par Note that equation \ref{eq:ResidualCapacityWithAntiParallel} not only is the general definition of equation \ref{eq:ResidualCapacityNoAntiParallel}, but also easier to implement. Unlike equation \ref{eq:ResidualCapacityNoAntiParallel} which required the amount of edge flow, equation \ref{eq:ResidualCapacityWithAntiParallel} only relies on previous residual capacities.\\
 	Now we need to redefine equation \ref{eq:augmentationOfFlowNoAntiparallel}. Suppose $p$ is an augmenting path in the i\textsuperscript{th} step.
 	\begin{equation}
 		f_i(u, v) = (f_{i - 1} \uparrow f_p)(u, v) = c(u, v) - c_{f_i}(u, v)
